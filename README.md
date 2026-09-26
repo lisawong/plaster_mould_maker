@@ -6,7 +6,7 @@ Build a repeatable STL → plaster mould → printable plaster-casting-form work
 
 Release 1 supports two-part plaster moulds from a single planar split, with deterministic checks, resumable jobs and hash-bound human review gates (input → plaster → forms → export). Release 2 targets more complex moulds. Printed casting forms use 3 mm walls with 20 mm outward lips, printed tongue-and-groove seams locked by external bulldog-style clips, walls 30 mm above the plaster block and a debossed fill line. The default finishing allowance is 0.1 mm per job. The finished skill will be evaluated on Sonnet 5 and Haiku 4.5.
 
-The accepted teapot demo is prototype evidence, not proof of general applicability. Its casting forms remain awaiting human review. See [PRD.md](PRD.md) for requirements and [PLAN.md](PLAN.md) for the staged build.
+The accepted teapot demo is prototype evidence, not proof of general applicability. Its casting forms remain awaiting human review. See [PRD.md](PRD.md) for requirements and [PLAN.md](PLAN.md) for the staged build. Progress: Stages 0–1 merged (scaffold + CI; job folder, schemas and review gates); Stage 2 next.
 
 ## Quick start
 
@@ -17,6 +17,7 @@ make coupon    # regenerate the groove test print
 uv run mouldflow --help
 uv run mouldflow job init path/to/job      # new job folder (settings, gates, artifact folders)
 uv run mouldflow job status path/to/job    # reverify hashes; gates + next_action as JSON
+uv run mouldflow job decide path/to/job input --revision REV --answer approve --note "..."
 ```
 
 ## Structure
@@ -41,6 +42,7 @@ uv run mouldflow job status path/to/job    # reverify hashes; gates + next_actio
 - `prints/groove-coupon/` — test-print STLs: groove block (5 clearances) and tongue.
 - `pyproject.toml`, `uv.lock`, `Makefile` — packaging, pinned environment, commands.
 - `.github/workflows/tests.yml` — CI: full suite on every push/PR (Ubuntu).
+- `.github/pull_request_template.md` — PR checklist, including the docs that must be updated before each PR.
 - `snapshot-manifest.json`, `handoff-verification.json` — snapshot hashes and predecessor verification.
 - `prototype-snapshot.zip` *(git-ignored)* — prototype source, tests and evidence.
 - `baseline/` *(git-ignored)* — hash-verified extraction of the snapshot with its own venv; read-only reference.
