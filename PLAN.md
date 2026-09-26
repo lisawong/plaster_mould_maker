@@ -5,6 +5,7 @@ Approved 2026-09-24. Implements [PRD.md](PRD.md). Every stage is test-first and 
 Fixed decisions: `src/` layout, `uv`, `pytest` (runs the ported unittest suite as-is), **pydantic v2** for settings/result schemas, `argparse` CLI.
 
 ## Stage 0 — Scaffold, port baseline, CI
+- **Status:** done — PR #1 merged 2026-09-26 (53 tests green in CI).
 - **Build:** `pyproject.toml` (Python 3.12, deps pinned `==` to `baseline/work/requirements.lock.txt`), `uv.lock`, `src/mouldflow/` ported verbatim from `baseline/work/mouldflow`, 45 tests ported to `tests/`, `make test`. Coupon tool stays in `tools/` and runs in the project venv. Teapot-specific scripts are not ported.
 - **Fixtures:** `tests/fixtures/historical/` (older three-part scene manifest + `.blend` used by `test_scene_artifact`, labelled historical); `tests/fixtures/teapot-v7/` (accepted source, prepared object, reference plaster halves, settings, reports) with a provenance file of snapshot hashes — needed by Stage 5 and by cloud sessions that can't see `baseline/`.
 - **CI:** GitHub Actions (ubuntu, uv) runs the full suite on push and PR. Confirms the macOS-captured pins install on Linux.
@@ -14,6 +15,7 @@ Fixed decisions: `src/` layout, `uv`, `pytest` (runs the ported unittest suite a
 From Stage 1 on, stages may run as Claude Code on the web sessions that open one PR per stage; CI must be green before merge. Use `/code-review ultra` on Stages 2, 4 and 7. Stage 9 (Blender) and physical prints stay local.
 
 ## Stage 1 — Job folder, schemas, state machine (no geometry)
+- **Status:** done — PR #2 merged 2026-09-26 (116 tests green in CI). Added `mouldflow job decide` beyond the planned `init|status`.
 - **Build:** `mouldflow job init|status`; pydantic settings (units, target, printer, allowance 0.1 mm, wall/lip 3 mm, lip 20 mm, groove clearance 0.25 mm/side, wall clearance 30 mm); versioned result record (status, metrics, limitations, `next_action`, evidence paths); four hash-bound gates; generic part/release-direction/removal-order model.
 - **Tests (first):** pending gate blocks; missing answer ≠ approval; upstream change invalidates downstream; relocation reverifies, never reapproves; per-job allowance doesn't leak.
 

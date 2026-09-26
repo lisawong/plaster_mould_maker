@@ -65,6 +65,8 @@
 
 ## Decisions
 
+- 2026-09-26: Stage 1 delivered as PR #2 and merged (CI green). Stage 2 is next and gets `/code-review ultra`.
+
 - 2026-09-26: Stage 1 gate design: gates bind to one settings section each (input↔source, plaster↔plaster, forms↔forms, export↔printer) plus the upstream approved revision, so e.g. a lip change invalidates forms/export only. Stale is sticky until resubmission. Only `strict_pass`/`conditional_finishing` outcomes are approvable. `mouldflow job decide` added alongside `init|status` so gates can be answered from the CLI.
 
 - 2026-09-26: One PR per stage, merged by the user after CI is green. Stage 0 delivered as PR #1.

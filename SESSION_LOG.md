@@ -162,8 +162,24 @@ No implementation or test execution occurred this session. No changes committed 
 
 ### Open todos
 
-- [ ] **User:** review and merge the Stage 1 PR once CI is green.
+- [x] **User:** review and merge the Stage 1 PR once CI is green.
 - [ ] **User:** print `prints/groove-coupon/` and report best slot + fill-line legibility (A026).
 - [ ] **User:** choose second STL (blocks Stage 10).
 - [ ] Stage 2 — known-answer fixtures, depth audit, adaptive sampling, `inconclusive`; trimesh divide-by-zero warnings. `/code-review ultra` on its PR.
+- [ ] Stages 3–11 per PLAN.md.
+
+- PR #2 opened: https://github.com/lisawong/plaster_mould_maker/pull/2 — CI green on push and PR runs (116 passed on ubuntu with the new action versions); merged by the user 2026-09-26.
+
+### Wrap — 2026-09-26 Stage 1 session closed
+
+- Agent: Claude Code on the web.
+- [x] Stage 1 complete: settings, result record, parts model, job folder + four hash-bound gates, `mouldflow job init|status|decide`, CI actions off Node 20.
+- [x] PR #2 merged; docs updated (README progress + CLI, PLAN status lines, TECHNICAL-REFERENCE result contract, SCRATCHPAD, this log).
+
+### Open todos
+
+- [ ] **User:** print `prints/groove-coupon/` and report best slot + fill-line legibility (A026).
+- [ ] **User:** choose second STL (blocks Stage 10).
+- [ ] Stage 2 — known-answer fixtures, depth audit, adaptive sampling, `inconclusive`; trimesh divide-by-zero warnings. `/code-review ultra` on its PR.
+- [ ] Retire prototype `workflow.ReviewWorkflow` once commands route through `job.Job` (record the retirement per R10.2).
 - [ ] Stages 3–11 per PLAN.md.
