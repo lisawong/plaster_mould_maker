@@ -122,3 +122,19 @@ No implementation or test execution occurred this session. No changes committed 
 - CI: `.github/workflows/tests.yml` (ubuntu, setup-uv, `uv sync --locked`, pytest).
 - Notes for Stage 1: `mouldflow` has no `__init__.py` (namespace package, kept verbatim); trimesh divide-by-zero warnings persist (Stage 2 item); user's shell exports `VIRTUAL_ENV` from pyenv, which makes uv print a harmless warning.
 - CI run 36218296190 on ubuntu: `uv sync --locked` OK, **53 passed** — the macOS-captured pins install on Linux. Annotations only: Node 20 action deprecation, ubuntu-latest → Ubuntu 26 from 2026-10-19.
+
+### Wrap — 2026-09-26 session closed
+
+- Agent: Claude Code.
+- [x] Mapped GitHub + Anthropic credit options onto the plan (cloud stage sessions, `/code-review ultra`, `@claude`, Stage 11 evaluation); recorded as A027–A029 and a PLAN working-mode section.
+- [x] Stage 0 complete on `stage-0-scaffold`: package ported verbatim, 53 tests green locally and in CI, V7 + historical fixtures with provenance, pinned `uv.lock`.
+- [x] Opened PR #1: https://github.com/lisawong/plaster_mould_maker/pull/1 (not merged).
+
+### Open todos
+
+- [ ] **User:** review and merge PR #1.
+- [ ] **User:** print `prints/groove-coupon/` and report best slot + fill-line legibility (A026).
+- [ ] **User:** choose second STL (blocks Stage 10).
+- [ ] Stage 1 — job folder, pydantic schemas, hash-bound gate state machine; add `mouldflow/__init__.py`; bump CI actions off Node 20. Candidate first cloud session (claude.ai/code).
+- [ ] Stage 2 — known-answer fixtures, depth audit, adaptive sampling, `inconclusive`; trimesh divide-by-zero warnings.
+- [ ] Stages 3–11 per PLAN.md.

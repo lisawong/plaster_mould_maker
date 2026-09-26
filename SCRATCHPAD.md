@@ -65,6 +65,8 @@
 
 ## Decisions
 
+- 2026-09-26: One PR per stage, merged by the user after CI is green. Stage 0 delivered as PR #1.
+
 - 2026-09-26: Stage 0 expanded: add GitHub Actions CI (Linux) and commit the V7 teapot fixtures (`tests/fixtures/teapot-v7/`) plus the historical scene fixtures, so the repo is self-sufficient for cloud sessions. Dependencies pinned `==` to baseline versions for reproduction; loosen deliberately later.
 
 - 2026-09-24: PLAN.md approved and saved (12 stages, 0–11). Teapot plaster regression moved directly after the plaster-generation stage (now Stage 5). pydantic v2 chosen for schemas. Groove test coupon generated ahead of Stage 7 for an early physical fit test.
