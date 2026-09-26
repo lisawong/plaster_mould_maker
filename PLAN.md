@@ -14,6 +14,14 @@ Fixed decisions: `src/` layout, `uv`, `pytest` (runs the ported unittest suite a
 ## Working mode
 From Stage 1 on, stages may run as Claude Code on the web sessions that open one PR per stage; CI must be green before merge. Use `/code-review ultra` on Stages 2, 4 and 7. Stage 9 (Blender) and physical prints stay local.
 
+**Docs before every PR.** Update the documentation in the same branch *before* opening the PR, so each merge leaves `main` current and no follow-up docs PR is needed:
+- `SESSION_LOG.md` — dated entry: work done, test count, notes for later stages, open todos (with the PR link once opened).
+- `PLAN.md` — the stage's **Status** line (mark done on merge in the next stage's PR if not known yet).
+- `README.md` — progress line, new commands, new modules/files in Structure.
+- `SCRATCHPAD.md` — new decisions (dated) and any new or resolved atoms.
+- `TECHNICAL-REFERENCE.md` / `PRD.md` / `EVALUATION-PLAN.md` — only where behaviour, contracts or scope changed.
+The PR template (`.github/pull_request_template.md`) carries this checklist.
+
 ## Stage 1 — Job folder, schemas, state machine (no geometry)
 - **Status:** done — PR #2 merged 2026-09-26 (116 tests green in CI). Added `mouldflow job decide` beyond the planned `init|status`.
 - **Build:** `mouldflow job init|status`; pydantic settings (units, target, printer, allowance 0.1 mm, wall/lip 3 mm, lip 20 mm, groove clearance 0.25 mm/side, wall clearance 30 mm); versioned result record (status, metrics, limitations, `next_action`, evidence paths); four hash-bound gates; generic part/release-direction/removal-order model.

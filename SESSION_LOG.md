@@ -183,3 +183,7 @@ No implementation or test execution occurred this session. No changes committed 
 - [ ] Stage 2 — known-answer fixtures, depth audit, adaptive sampling, `inconclusive`; trimesh divide-by-zero warnings. `/code-review ultra` on its PR.
 - [ ] Retire prototype `workflow.ReviewWorkflow` once commands route through `job.Job` (record the retirement per R10.2).
 - [ ] Stages 3–11 per PLAN.md.
+
+### Workflow update — 2026-09-26
+
+- User asked that docs be updated before each PR rather than after merge. Added a "Docs before every PR" rule to PLAN.md's Working mode and a PR template with the docs checklist. This wrap + workflow change goes to `main` as one PR.

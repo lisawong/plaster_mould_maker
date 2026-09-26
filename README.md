@@ -42,6 +42,7 @@ uv run mouldflow job decide path/to/job input --revision REV --answer approve --
 - `prints/groove-coupon/` — test-print STLs: groove block (5 clearances) and tongue.
 - `pyproject.toml`, `uv.lock`, `Makefile` — packaging, pinned environment, commands.
 - `.github/workflows/tests.yml` — CI: full suite on every push/PR (Ubuntu).
+- `.github/pull_request_template.md` — PR checklist, including the docs that must be updated before each PR.
 - `snapshot-manifest.json`, `handoff-verification.json` — snapshot hashes and predecessor verification.
 - `prototype-snapshot.zip` *(git-ignored)* — prototype source, tests and evidence.
 - `baseline/` *(git-ignored)* — hash-verified extraction of the snapshot with its own venv; read-only reference.
