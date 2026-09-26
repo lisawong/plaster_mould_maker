@@ -5,6 +5,7 @@ description = "STL -> plaster mould -> printable casting-form workflow"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 # Pinned to baseline/work/requirements.lock.txt (Stage 0 reproduces the prototype).
+# pydantic added in Stage 1 (PLAN.md fixed decision), pinned the same way.
 # Loosen deliberately in a later stage, not incidentally.
 dependencies = [
     "fast_simplification==0.2.0",
@@ -13,14 +14,17 @@ dependencies = [
     "networkx==3.6.1",
     "numpy==2.5.3",
     "pillow==12.3.0",
+    "pydantic==2.13.5",
     "rtree==1.4.1",
     "scikit-image==0.26.0",
     "scipy==1.18.1",
     "trimesh==5.1.0",
+    "typing-extensions==4.16.0",
+    "typing-inspection==0.4.4",
 ]
 
 [project.scripts]
-mouldflow = "mouldflow.__main__:main"
+mouldflow = "mouldflow.cli:main"
 
 [dependency-groups]
 dev = ["pytest>=8"]
@@ -28,6 +32,7 @@ dev = ["pytest>=8"]
 [tool.uv]
 # Transitive pins from the baseline lock, so uv.lock reproduces the verified environment.
 constraint-dependencies = [
+    "annotated-types==0.8.0",
     "contourpy==1.4.0",
     "cycler==0.12.1",
     "fast_simplification==0.2.0",
@@ -41,6 +46,8 @@ constraint-dependencies = [
     "numpy==2.5.3",
     "packaging==26.3",
     "pillow==12.3.0",
+    "pydantic==2.13.5",
+    "pydantic-core==2.46.5",
     "pyparsing==3.3.2",
     "python-dateutil==2.9.0.post0",
     "rtree==1.4.1",
@@ -49,6 +56,8 @@ constraint-dependencies = [
     "six==1.17.0",
     "tifffile==2026.9.15",
     "trimesh==5.1.0",
+    "typing-extensions==4.16.0",
+    "typing-inspection==0.4.4",
 ]
 
 [build-system]

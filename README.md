@@ -15,6 +15,8 @@ uv sync        # Python 3.12 env from uv.lock
 make test      # full suite (uv run pytest)
 make coupon    # regenerate the groove test print
 uv run mouldflow --help
+uv run mouldflow job init path/to/job      # new job folder (settings, gates, artifact folders)
+uv run mouldflow job status path/to/job    # reverify hashes; gates + next_action as JSON
 ```
 
 ## Structure
@@ -26,8 +28,13 @@ uv run mouldflow --help
 - `EVALUATION-PLAN.md` — geometry, workflow and operator acceptance criteria.
 - `SCRATCHPAD.md` — idea atoms and dated decisions.
 - `SESSION_LOG.md` — session work and outstanding tasks.
-- `src/mouldflow/` — the package (ported verbatim from the prototype in Stage 0).
-- `tests/` — pytest suite: 45 ported baseline tests + coupon tests.
+- `src/mouldflow/` — the package. Prototype modules ported verbatim in Stage 0; Stage 1 added:
+  - `settings.py` — pydantic per-job settings (source, plaster, forms, printer sections) with PRD defaults.
+  - `result.py` — versioned JSON result record (`mouldflow.result/1`), outcomes and unit-tagged metrics.
+  - `parts.py` — generic parts, release directions and removal order (`two_part_planar` for Release 1).
+  - `job.py` — job folder and the four hash-bound review gates (input → plaster → forms → export).
+  - `cli.py` — `mouldflow job init|status|decide`; other arguments fall through to the prototype generator.
+- `tests/` — pytest suite: 45 ported baseline tests, coupon tests and Stage 1 job/schema tests.
   - `tests/fixtures/teapot-v7/` — accepted V7 source, prepared object and plaster halves for the Stage 5 regression; see its `PROVENANCE.md`.
   - `tests/fixtures/historical/` — older three-part study used only by `test_scene_artifact` (historical, not V7 evidence).
 - `tools/groove_coupon.py` — generator for the groove-clearance test print.

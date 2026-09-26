@@ -138,3 +138,32 @@ No implementation or test execution occurred this session. No changes committed 
 - [ ] Stage 1 — job folder, pydantic schemas, hash-bound gate state machine; add `mouldflow/__init__.py`; bump CI actions off Node 20. Candidate first cloud session (claude.ai/code).
 - [ ] Stage 2 — known-answer fixtures, depth audit, adaptive sampling, `inconclusive`; trimesh divide-by-zero warnings.
 - [ ] Stages 3–11 per PLAN.md.
+
+## 2026-09-26 — Stage 1 (cloud session, branch `claude/sharp-darwin-or4hsv`)
+
+- Session state: PR #1 (Stage 0) merged; clean checkout of `main`, 53 tests green before starting.
+- Agent: Claude Code on the web.
+- Goal: Stage 1 — job folder, schemas, state machine (no geometry).
+
+### Work done
+
+- Tests first: `test_settings.py`, `test_result.py`, `test_parts.py`, `test_job.py`, `test_job_cli.py` (63 tests) — all failed at collection before implementation.
+- Added `pydantic==2.13.5` (+ transitive constraints) to `pyproject.toml`/`uv.lock`.
+- New modules: `settings.py`, `result.py`, `parts.py`, `job.py`, `cli.py`; added `mouldflow/__init__.py` (package is no longer a namespace package). `mouldflow` console script now points at `cli:main`; non-`job` arguments fall through to the prototype generator, and `python -m mouldflow` is unchanged.
+- Gate semantics: each submission binds artifact hashes (relative paths), its settings section (input↔source, plaster↔plaster, forms↔forms, export↔printer) and the upstream approved revision. Mismatch → `stale`, persisted, cascades downstream, never heals if bytes are restored. Approval needs an explicit `approve` answer plus a human note and an approvable outcome (`strict_pass`/`conditional_finishing`). Relocation is logged, all hashes reverified, intact approvals kept, nothing re-approved.
+- CI actions bumped off Node 20: `actions/checkout@v5`, `astral-sh/setup-uv@v7`.
+- Result: **116 passed** locally (53 baseline + 63 Stage 1).
+
+### Notes for later stages
+
+- The prototype `workflow.ReviewWorkflow` (absolute-path state) is still used by `__main__`/`review.py` and their baseline tests; later stages should route through `job.Job` and retire it explicitly (R10.2).
+- `state.json` keeps one absolute path, `last_verified_root`, solely to detect relocation.
+- Status reverifies by rehashing every artifact on each call; fine at current sizes, revisit if jobs get large.
+
+### Open todos
+
+- [ ] **User:** review and merge the Stage 1 PR once CI is green.
+- [ ] **User:** print `prints/groove-coupon/` and report best slot + fill-line legibility (A026).
+- [ ] **User:** choose second STL (blocks Stage 10).
+- [ ] Stage 2 — known-answer fixtures, depth audit, adaptive sampling, `inconclusive`; trimesh divide-by-zero warnings. `/code-review ultra` on its PR.
+- [ ] Stages 3–11 per PLAN.md.
