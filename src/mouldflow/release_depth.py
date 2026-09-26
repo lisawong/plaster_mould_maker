@@ -6,11 +6,11 @@ its smallest enclosing-box thickness to cover its interior (distance is
 """
 import numpy as np
 import trimesh
-from .pipeline import boolean
+from .pipeline import boolean,is_solid
 
-def _boundary_bound(triangles,reference,tolerance):
+def _boundary_bound(triangles,reference,tolerance,max_levels=12):
     pending=triangles;measured=0.;settled=0.;last_upper=0.
-    for _ in range(12):
+    for _ in range(max_levels):
         unresolved=[];last_upper=0.
         for start in range(0,len(pending),512):
             t=pending[start:start+512];centers=t.mean(axis=1)
@@ -30,7 +30,7 @@ def _boundary_bound(triangles,reference,tolerance):
         if len(pending)>250000:break
     return measured,max(settled,last_upper)
 
-def collision_depth_bound(collision,reference,spatial_tolerance_mm=.02):
+def collision_depth_bound(collision,reference,spatial_tolerance_mm=.02,max_levels=12):
     if not np.isfinite(spatial_tolerance_mm) or spatial_tolerance_mm<=0:raise ValueError('Positive finite spatial tolerance required')
     if not len(collision.faces):return {'measured_depth_mm':0.,'upper_bound_mm':0.,'components':[]}
     components=[];contact_fragments=0
@@ -39,17 +39,17 @@ def collision_depth_bound(collision,reference,spatial_tolerance_mm=.02):
             contact_fragments+=1
             continue
         enclosure='original_component'
-        if not component.is_volume:
+        if not is_solid(component):
             try:
                 component=component.convex_hull
                 enclosure='convex_enclosure_of_fragment'
             except Exception as error:
                 if np.linalg.matrix_rank(component.vertices-component.vertices.mean(axis=0),tol=1e-10)>=3:
                     raise ValueError('Cannot construct a conservative collision enclosure') from error
-                measured,boundary=_boundary_bound(component.triangles,reference,spatial_tolerance_mm)
+                measured,boundary=_boundary_bound(component.triangles,reference,spatial_tolerance_mm,max_levels)
                 components.append({'measured_boundary_depth_mm':measured,'boundary_upper_bound_mm':boundary,'interior_cover_radius_mm':0.,'upper_bound_mm':boundary,'bounds_mm':component.bounds.tolist(),'enclosure':'lower_dimensional_contact'})
                 continue
-        measured,boundary=_boundary_bound(component.triangles,reference,spatial_tolerance_mm)
+        measured,boundary=_boundary_bound(component.triangles,reference,spatial_tolerance_mm,max_levels)
         try:_,extents=trimesh.bounds.oriented_bounds(component);thickness=float(min(min(extents),min(component.extents)))
         except Exception:thickness=float(min(component.extents))
         components.append({'enclosure':enclosure,'measured_boundary_depth_mm':measured,'boundary_upper_bound_mm':boundary,'interior_cover_radius_mm':thickness/2,'upper_bound_mm':boundary+thickness/2,'bounds_mm':component.bounds.tolist()})

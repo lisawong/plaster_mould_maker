@@ -6,7 +6,7 @@ Build a repeatable STL → plaster mould → printable plaster-casting-form work
 
 Release 1 supports two-part plaster moulds from a single planar split, with deterministic checks, resumable jobs and hash-bound human review gates (input → plaster → forms → export). Release 2 targets more complex moulds. Printed casting forms use 3 mm walls with 20 mm outward lips, printed tongue-and-groove seams locked by external bulldog-style clips, walls 30 mm above the plaster block and a debossed fill line. The default finishing allowance is 0.1 mm per job. The finished skill will be evaluated on Sonnet 5 and Haiku 4.5.
 
-The accepted teapot demo is prototype evidence, not proof of general applicability. Its casting forms remain awaiting human review. See [PRD.md](PRD.md) for requirements and [PLAN.md](PLAN.md) for the staged build. Progress: Stages 0–1 merged (scaffold + CI; job folder, schemas and review gates); Stage 2 next.
+The accepted teapot demo is prototype evidence, not proof of general applicability. Its casting forms remain awaiting human review. See [PRD.md](PRD.md) for requirements and [PLAN.md](PLAN.md) for the staged build. Progress: Stages 0–1 merged (scaffold + CI; job folder, schemas and review gates); Stage 2 (known-answer fixtures, depth-semantics audit, `release_check`) in review.
 
 ## Quick start
 
@@ -35,7 +35,10 @@ uv run mouldflow job decide path/to/job input --revision REV --answer approve --
   - `parts.py` — generic parts, release directions and removal order (`two_part_planar` for Release 1).
   - `job.py` — job folder and the four hash-bound review gates (input → plaster → forms → export).
   - `cli.py` — `mouldflow job init|status|decide`; other arguments fall through to the prototype generator.
-- `tests/` — pytest suite: 45 ported baseline tests, coupon tests and Stage 1 job/schema tests.
+  Stage 2 added:
+  - `release_check.py` — `assess_release`: two-sided penetration depth (mm) with a whole-motion bound, adaptive refinement and `strict_pass` / `conditional_finishing` / `inconclusive` / `fail` / `unsupported`.
+  - `known_answers.py` — known-answer release fixtures for the EVALUATION-PLAN geometry rows.
+- `tests/` — pytest suite: 45 ported baseline tests, coupon tests, Stage 1 job/schema tests and Stage 2 known-answer release tests.
   - `tests/fixtures/teapot-v7/` — accepted V7 source, prepared object and plaster halves for the Stage 5 regression; see its `PROVENANCE.md`.
   - `tests/fixtures/historical/` — older three-part study used only by `test_scene_artifact` (historical, not V7 evidence).
 - `tools/groove_coupon.py` — generator for the groove-clearance test print.

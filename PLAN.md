@@ -28,6 +28,7 @@ The PR template (`.github/pull_request_template.md`) carries this checklist.
 - **Tests (first):** pending gate blocks; missing answer ≠ approval; upstream change invalidates downstream; relocation reverifies, never reapproves; per-job allowance doesn't leak.
 
 ## Stage 2 — Known-answer fixtures & depth-semantics audit
+- **Status:** PR open (branch `claude/stage-2-f3zrxy`) — 139 tests green locally. Added two-sided depth and a proven between-sample bound beyond the planned audit (see TECHNICAL-REFERENCE, Stage 2 audit).
 - **Build:** fixture library for each EVALUATION-PLAN row (thin-wide overlap, deep catch, zero-thickness contact, near-coplanar sliver, between-sample catch, self-intersecting mesh). Audit `release_depth`; add adaptive sample refinement near the allowance; add `inconclusive`. Investigate the trimesh divide-by-zero warnings seen in the baseline run.
 - **Trade-off:** adaptive sampling (Release 1) vs continuous collision detection (research). Unresolvable → `inconclusive`.
 - **Tests (first):** each fixture asserts metric unit (mm vs mm³), bound-vs-measured and outcome.

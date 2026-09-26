@@ -63,7 +63,18 @@
 - **A029 CI gates every PR** `[constraint]`
   GitHub Actions runs the full test suite on push/PR so cloud or `@claude` work shows green/red before merge.
 
+- **A030 Two-sided release depth** `[evidence]`
+  Depth below the fixed surface alone is ≤ half the fixed feature's thickness, so it misses parts sweeping through thin fixed walls. Stage 2 uses max(depth below fixed, depth below moving).
+- **A031 Whole-motion depth bound** `[evidence]`
+  Two-sided depth is 1-Lipschitz in travel, so sampled upper bounds give a proven bound between samples. Releases are covered from 0 to the clearance distance.
+- **A032 strict_pass wording** `[question]`
+  `strict_pass` = contact-only at every sample and the whole-motion bound below the allowance; between samples depth is bounded, not proven zero. Confirm this is acceptable, or require a tighter between-sample bound (costs many more samples).
+- **A033 Teapot sample cost** `[question]`
+  The whole-motion bound needs sample gaps below 2× the allowance where depth is zero, and much finer ones near it. One refined V7 pose took 4–12 minutes. Stage 5 needs faster containment/distance queries, or an explicit and recorded treatment of the complementary initial pose, before the V7 regression is practical.
+
 ## Decisions
+
+- 2026-09-26: Stage 2 depth audit. New release checks go through `release_check.assess_release` (two-sided depth, Lipschitz whole-motion bound, adaptive spatial/temporal refinement, `inconclusive` when unresolved, `unsupported` for invalid solids). Prototype `check_release` / `check_release_depth` keep their behaviour for the baseline. Contact tolerance 1e-3 mm. trimesh divide-by-zero warnings traced to mass-property volume on zero-volume Booleans; fixed with `solid_volume` / `is_solid`.
 
 - 2026-09-26: Workflow change: documentation (SESSION_LOG, PLAN status, README, SCRATCHPAD, and reference docs where affected) is updated in each stage branch before its PR is opened; checklist in `.github/pull_request_template.md`. No separate docs PRs after merge.
 

@@ -42,6 +42,25 @@ def box_between(lo, hi):
     return mesh
 
 
+def solid_volume(mesh):
+    """Signed enclosed volume in mm3 via the divergence theorem.
+
+    trimesh's ``volume`` goes through mass properties, which divide by the volume for
+    the centre of mass; zero-thickness Boolean results (touching solids) then raise
+    divide-by-zero RuntimeWarnings. This computes the volume alone.
+    """
+    if not len(mesh.faces):
+        return 0.
+    t=mesh.triangles
+    return float(np.einsum('ij,ij->i',t[:,0],np.cross(t[:,1],t[:,2])).sum()/6)
+
+
+def is_solid(mesh):
+    """trimesh's ``is_volume`` without its centre-of-mass step, which warns on zero-volume
+    closed fragments. Closed, consistently wound and positive volume."""
+    return bool(len(mesh.faces) and mesh.is_watertight and mesh.is_winding_consistent and solid_volume(mesh)>0)
+
+
 def boolean(op, meshes):
     return getattr(trimesh.boolean,op)(meshes,engine='manifold')
 
@@ -101,7 +120,7 @@ def check_release(moving, fixed, direction, distances, tolerance_mm3=0.001):
     for distance in distances:
         shifted=moving.copy(); shifted.apply_translation(direction*distance)
         intersection=boolean('intersection',[shifted,fixed])
-        volume=max(0,float(intersection.volume)) if len(intersection.faces) else 0.
+        volume=max(0.,solid_volume(intersection))
         samples.append(dict(distance_mm=float(distance),intersection_mm3=volume))
     return dict(passed=all(s['intersection_mm3']<=tolerance_mm3 for s in samples),
                 tolerance_mm3=tolerance_mm3,samples=samples,
