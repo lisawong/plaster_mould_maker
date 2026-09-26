@@ -1,0 +1,488 @@
+{
+  "created": "2026-09-21",
+  "original_workspace": "/Users/lisawong/Documents/Codex/2026-09-18/i",
+  "scope": "Selected current prototype and evidence, not a full workspace backup or installed skill",
+  "archive_sha256": "0ff607a09188e1a70308e9d6ddc81188879116fb38fe7313309cf0255e960e10",
+  "files": [
+    {
+      "path": "PLAN.md",
+      "bytes": 6146,
+      "sha256": "d089d3460822f400dc12db89f0cbee25575479d49f8d5e56d21f358447ad8f55"
+    },
+    {
+      "path": "PRD.md",
+      "bytes": 7887,
+      "sha256": "379b43f03ffbd21220e64bcfdfd69597cc23dcca3162399967bbc869ced187a3"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3369,
+      "sha256": "82b63c883c25de63f9bbc8d91278e0777b92f392bffeb51266c5c565c9c8017c"
+    },
+    {
+      "path": "SCRATCHPAD.md",
+      "bytes": 16289,
+      "sha256": "436567d6005a5eda1a25ab7d198a622171dc2b3fd2dae7cc0d8e5b6428714eea"
+    },
+    {
+      "path": "SESSION_LOG.md",
+      "bytes": 20353,
+      "sha256": "aabbd0c37318f15cc174db19a439593bc47a402db1eaac22720e1260955edde5"
+    },
+    {
+      "path": "outputs/IMPLEMENTATION-NOTES.md",
+      "bytes": 10878,
+      "sha256": "a06466244037b5c022a2c75f606a790ed801fb9c06dc12e6f1cacec70a2a47cc"
+    },
+    {
+      "path": "outputs/WORKFLOW-QUICKSTART.md",
+      "bytes": 10923,
+      "sha256": "2832207fac39814e575b16a97bd39ee5b6737b30658e48068167fecb5a909270"
+    },
+    {
+      "path": "outputs/base-repair-review-v7/BLENDER-REVIEW.md",
+      "bytes": 1113,
+      "sha256": "d6238eac165a3d62e6c81951126f204fbc7ce6ab4f60293c3a08da47133b7181"
+    },
+    {
+      "path": "outputs/base-repair-review-v7/acceptance.json",
+      "bytes": 208,
+      "sha256": "a4f0a0ac28fec5cf9fcf36fa059edb9722617dc0bd1d9bf93cbbfe1d5537dd93"
+    },
+    {
+      "path": "outputs/base-repair-review-v7/blender-review-manifest.json",
+      "bytes": 607,
+      "sha256": "910940f0b28173c95058d1e4dbfa7317c7d60637111bb2e875a752ab9559d58e"
+    },
+    {
+      "path": "outputs/base-repair-review-v7/comparison.png",
+      "bytes": 59686,
+      "sha256": "9776fd40324107d20b30e9b193f506b230cbaaf9d83fe56152a46d3ffdacaa3d"
+    },
+    {
+      "path": "outputs/base-repair-review-v7/diagnostic-report.json",
+      "bytes": 9794,
+      "sha256": "6a01d09c8b23c44a3960327b038188dc0a0e31b03352bbe8aec120c39979e10f"
+    },
+    {
+      "path": "outputs/base-repair-review-v7/input.stl",
+      "bytes": 1984484,
+      "sha256": "528a1b934cdb656a18287958a34bcf25bd0459205a52e72bd46cb80e85c3c730"
+    },
+    {
+      "path": "outputs/base-repair-review-v7/original-crossings.json",
+      "bytes": 591,
+      "sha256": "722f5703f81efb6133969ddc9a8e3f2b0f65caad6e0e43743b082c208becaf76"
+    },
+    {
+      "path": "outputs/base-repair-review-v7/original.stl",
+      "bytes": 1984484,
+      "sha256": "f729c5eb29df7c2dedfb9be2882bd8802b97d2c459da1affb84c42070296b832"
+    },
+    {
+      "path": "outputs/base-repair-review-v7/repair-report.json",
+      "bytes": 902,
+      "sha256": "f35faa693f502eecf0775155211cdedd98aea0f7593a3358bc722e7fec9ed981"
+    },
+    {
+      "path": "outputs/base-repair-review-v7/review-context.json",
+      "bytes": 1157,
+      "sha256": "8d9fa1edc20ef0ec78da0420b6c94fe64f3e785b7c5dfe312ec72659d664c95b"
+    },
+    {
+      "path": "outputs/base-repair-review-v7/review-state-snapshot.json",
+      "bytes": 16430,
+      "sha256": "a4bdd9628d08de439e0edadfe74f055db0b7d395a66fea77d0b4791e2d2167ea"
+    },
+    {
+      "path": "outputs/base-repair-review-v7/seam-diagnostic.json",
+      "bytes": 132,
+      "sha256": "4d8f556238164e27c533ff638b137a41a8c506fdf8c874f05ca38968de567d40"
+    },
+    {
+      "path": "outputs/base-repair-review-v7/settings.json",
+      "bytes": 2717,
+      "sha256": "d8dbca9ec4333c17282e1fc00ab74268c362bf17252a63b155d85c60286b22e8"
+    },
+    {
+      "path": "outputs/base-repair-review-v7/teapot-context-review.blend",
+      "bytes": 4527696,
+      "sha256": "38cdacb04e70894743b05a47604ba3de87b1e454ab389817e7748002e09e896a"
+    },
+    {
+      "path": "outputs/base-repair-review-v7/whole-object-locator.png",
+      "bytes": 778772,
+      "sha256": "8a43e40317193c0b3b8cf3bd0dc4e4f2f076908e7ead82021fb540e22bbef1b8"
+    },
+    {
+      "path": "outputs/casting-forms-review-v7/README.md",
+      "bytes": 1781,
+      "sha256": "a7dbbe00b3c8180a02ce75f2df766605f5af3f57439dc33a60b2d773d4efaf37"
+    },
+    {
+      "path": "outputs/casting-forms-review-v7/depth-summary.json",
+      "bytes": 2104,
+      "sha256": "5edf0ce0a9cc21c403b23d038c71263a8235dccdaff492145239ba213b9028c0"
+    },
+    {
+      "path": "outputs/casting-forms-review-v7/exploded-casting-forms.png",
+      "bytes": 2017243,
+      "sha256": "b1e448b7054d002a6da8e7687a58f55ca974d9f5c432018232af22f81c4687ab"
+    },
+    {
+      "path": "outputs/casting-forms-review-v7/long_wall.stl",
+      "bytes": 684,
+      "sha256": "c1acfd20fd598efbab1911efb1bf5c308976476794e04b124a8bdfcb44798a95"
+    },
+    {
+      "path": "outputs/casting-forms-review-v7/manifest.json",
+      "bytes": 4877,
+      "sha256": "686b33b3f0a01afe789a5905441df55840d17f04b286edf76eb6b96b2d2f7fee"
+    },
+    {
+      "path": "outputs/casting-forms-review-v7/pattern_A.stl",
+      "bytes": 1169084,
+      "sha256": "105580b5d72b7c8f93bec786f1d6a7950a43445646d9af3f9a23b3be55eae76e"
+    },
+    {
+      "path": "outputs/casting-forms-review-v7/pattern_B.stl",
+      "bytes": 1177084,
+      "sha256": "8b7658f87c0f5cfc08d1b1a2dd46408796e4f231bb24a44ce668adf5062cb6f6"
+    },
+    {
+      "path": "outputs/casting-forms-review-v7/short_wall.stl",
+      "bytes": 684,
+      "sha256": "1947875055bb25fa8699c1ff5889d41a25c3804b2994fdb050c0ace3d55a2e6e"
+    },
+    {
+      "path": "outputs/exploded-design-v7/exploded-casting-forms.png",
+      "bytes": 2017243,
+      "sha256": "b1e448b7054d002a6da8e7687a58f55ca974d9f5c432018232af22f81c4687ab"
+    },
+    {
+      "path": "outputs/exploded-design-v7/exploded-design.blend",
+      "bytes": 4799450,
+      "sha256": "bccdd4e5a50bd2560248b32497e568211f01474cde98469de5b751ac4b10754c"
+    },
+    {
+      "path": "outputs/exploded-design-v7/exploded-plaster.png",
+      "bytes": 2003995,
+      "sha256": "6c901a781f09e352c57029689922cf4a8603c9038dc2c73e379c203b5258ade2"
+    },
+    {
+      "path": "outputs/exploded-design-v7/manifest.json",
+      "bytes": 7232,
+      "sha256": "5f6ddc9d058af00e0b3cdd881874ad796443e36cbeaf64aced88a803b8c08ccb"
+    },
+    {
+      "path": "outputs/exploded-design-v7/opened-plaster.png",
+      "bytes": 2059003,
+      "sha256": "2073de86390fd59ad203ab9ccb52bdb59d3c1cce005fbe76d67033e70a10db71"
+    },
+    {
+      "path": "outputs/exploded-design-v7/plaster-appearance-acceptance.json",
+      "bytes": 1107,
+      "sha256": "2c8a49812b2ddb72efd66afd92ac4548aa695cc1303752b5613a1fd29d28f813"
+    },
+    {
+      "path": "outputs/sanding-assessment-v7-final/plaster_1_vs_printed_pattern.json",
+      "bytes": 940220,
+      "sha256": "ab42a84776d96f25f6de917b96567d3065bf9c2a0ecaebb154c50c3c5a875702"
+    },
+    {
+      "path": "outputs/sanding-assessment-v7-final/plaster_1_vs_teapot.json",
+      "bytes": 939264,
+      "sha256": "060d451933b5452109107cfc8d05a3e890568d19b7814b5aa52161f90a32bca8"
+    },
+    {
+      "path": "outputs/sanding-assessment-v7-final/plaster_2_vs_printed_pattern.json",
+      "bytes": 866016,
+      "sha256": "ade8e6c0368667dbf1729eda330477477e58c9c3a07103b944569658be1b0a2d"
+    },
+    {
+      "path": "outputs/sanding-assessment-v7-final/plaster_2_vs_teapot.json",
+      "bytes": 874772,
+      "sha256": "963587b012dfe6ec674831151d692ab63c51f41211dcb19acbf51d285be230b0"
+    },
+    {
+      "path": "outputs/sanding-assessment-v7-final/summary.json",
+      "bytes": 2104,
+      "sha256": "5edf0ce0a9cc21c403b23d038c71263a8235dccdaff492145239ba213b9028c0"
+    },
+    {
+      "path": "outputs/scene-manifest.json",
+      "bytes": 174,
+      "sha256": "e551fa35257b00d414eaaeea00fa4d4626c6e63632440e971d0fb7c6042a9e18"
+    },
+    {
+      "path": "outputs/source-review-v2/review-state.json",
+      "bytes": 17849,
+      "sha256": "8acfae8e46d2fa53b20a3359f57dd41d57d505042e8cbbc0db19ac4e460754b5"
+    },
+    {
+      "path": "outputs/teapot-design-study.blend",
+      "bytes": 3991067,
+      "sha256": "fc0ba31e81d6599724a786184b22f9d71fd67a3aed273b11cd2fb548c87c8b51"
+    },
+    {
+      "path": "work/assess_v7_depth.py",
+      "bytes": 1730,
+      "sha256": "8ffdaea324b045d98393eb9e698b06fd417acaf5b80029b6db72c38e7add6eb5"
+    },
+    {
+      "path": "work/base-diagnostic-v7/prepared_object.stl",
+      "bytes": 1984484,
+      "sha256": "ec6375ecc43d696f230825966dc1730db0b5c0bb691602f109a620320499c729"
+    },
+    {
+      "path": "work/base-diagnostic-v7/print_candidates/master_1.stl",
+      "bytes": 1169084,
+      "sha256": "2c36b61ae457b1ae50efbe140364b18e4f83e9d43877e9e62b5d004e6c47569f"
+    },
+    {
+      "path": "work/base-diagnostic-v7/print_candidates/master_2.stl",
+      "bytes": 1177084,
+      "sha256": "584a41312d9ae46102d308a238d6ab03477d0fee5c9ebb73d98c36a6e6cd2f88"
+    },
+    {
+      "path": "work/base-diagnostic-v7/print_candidates/wall_1.stl",
+      "bytes": 684,
+      "sha256": "4c990aed21c57b730535586ac4ef16c9d85681dcb60c91cf00fd9ae73f663442"
+    },
+    {
+      "path": "work/base-diagnostic-v7/print_candidates/wall_2.stl",
+      "bytes": 684,
+      "sha256": "9c7f2a9070683691b5393dcebf543902991a151f9fc19ea56da14df5db6fe895"
+    },
+    {
+      "path": "work/base-diagnostic-v7/print_candidates/wall_3.stl",
+      "bytes": 684,
+      "sha256": "a8b2b1a322152cc0a17ef6d46373bb03b478096a9f0169c737513b6a7a64081f"
+    },
+    {
+      "path": "work/base-diagnostic-v7/print_candidates/wall_4.stl",
+      "bytes": 684,
+      "sha256": "73baf25e3ff9bc1a0aeab1cb9f26a60301c64c66bf52f09daa9a7b663eeaf2d4"
+    },
+    {
+      "path": "work/base-diagnostic-v7/reference_plaster/plaster_1.stl",
+      "bytes": 1168284,
+      "sha256": "8ad0f2e63d6ac409cf5142b469510e04f7384a8f89132044890f66f2d607e2c5"
+    },
+    {
+      "path": "work/base-diagnostic-v7/reference_plaster/plaster_2.stl",
+      "bytes": 1176284,
+      "sha256": "4a62b6be5fb6d347efe674dd8c2769033ee3a3d1611641d0dc56e50ae29383d7"
+    },
+    {
+      "path": "work/base-diagnostic-v7/report.json",
+      "bytes": 9794,
+      "sha256": "6a01d09c8b23c44a3960327b038188dc0a0e31b03352bbe8aec120c39979e10f"
+    },
+    {
+      "path": "work/base-diagnostic-v7/settings.json",
+      "bytes": 117,
+      "sha256": "6308586a18ecf8bbd0d332791857e7cabd14d0f803d4721caa81afd54e8a20bc"
+    },
+    {
+      "path": "work/build_exploded_v7.py",
+      "bytes": 5509,
+      "sha256": "47d066a4894f51d48989713bfe02862ba32d0e17556d45d5946250d357164cd2"
+    },
+    {
+      "path": "work/configs/lid-lip-edit.json",
+      "bytes": 167,
+      "sha256": "2b175e2b7a44ded5230b566d763659b695d12a83609f8cf0c95c95bfa7524218"
+    },
+    {
+      "path": "work/configs/teapot-top-cap.json",
+      "bytes": 146,
+      "sha256": "623c4acc2cdcafbb66829b268fbabe9cc8e4e13b0819b84a87c8fa2fb394c288"
+    },
+    {
+      "path": "work/configs/teapot-two-part.json",
+      "bytes": 93,
+      "sha256": "84b769b70e53cb51004a8d4fadc005d82fe91e5ab32f073d47075d8a5f948e9a"
+    },
+    {
+      "path": "work/export_forms_review_v7.py",
+      "bytes": 4481,
+      "sha256": "83f49bb83c76b0453c9199cf11282797ee493f555929dc4cd81e212f8edeb616"
+    },
+    {
+      "path": "work/mouldflow/__main__.py",
+      "bytes": 4896,
+      "sha256": "8e3f225a23eff59b59d8a136556abb0e050c1835f5a1644c5637033dafcb367f"
+    },
+    {
+      "path": "work/mouldflow/contour_seam.py",
+      "bytes": 2890,
+      "sha256": "33e92292e446c5944f73693f5d999fb64d982675c5ba1c803f5e3ddc67021545"
+    },
+    {
+      "path": "work/mouldflow/intersections.py",
+      "bytes": 1410,
+      "sha256": "722d7e6ea9973fec75e5535e57867b41e399a86ceaccbfc75a07f1f44efe7a9f"
+    },
+    {
+      "path": "work/mouldflow/pipeline.py",
+      "bytes": 7484,
+      "sha256": "d549ae15e89482a5779a65ab2f76cb119e4bcc02a991af49fc42168035a35346"
+    },
+    {
+      "path": "work/mouldflow/preview.py",
+      "bytes": 1398,
+      "sha256": "61f183e87dc13c0950e24af4fb2203d71a01e7ccc70127eb600e6a5bd75d65d9"
+    },
+    {
+      "path": "work/mouldflow/print_layout.py",
+      "bytes": 798,
+      "sha256": "be9cda80a5662ab33e09f4ef0153ffd3978b96fdc35d348ff9d4c23039a9d228"
+    },
+    {
+      "path": "work/mouldflow/release_depth.py",
+      "bytes": 5466,
+      "sha256": "b458eef7da0af5b32cda25f1074074e25013c2202a74dbf77c99802448c48ac1"
+    },
+    {
+      "path": "work/mouldflow/repair.py",
+      "bytes": 3031,
+      "sha256": "99a9a22041721756a8df6cd1f8d4780e967d917c8d49bcf13beb25ac5f77da94"
+    },
+    {
+      "path": "work/mouldflow/review.py",
+      "bytes": 5989,
+      "sha256": "2d2c732fe04575594f03fadb896c6c7b888a8b2648e2031da8c1b520960b9a5e"
+    },
+    {
+      "path": "work/mouldflow/review_context.py",
+      "bytes": 1474,
+      "sha256": "cfdee3e6b6973168e318af5776de791781bd17ebd65d8164783c0dc0755e0735"
+    },
+    {
+      "path": "work/mouldflow/simplify.py",
+      "bytes": 8272,
+      "sha256": "e7348304bed61a427df551f4af08171f1b1b7f2910924d320905d00cd191c109"
+    },
+    {
+      "path": "work/mouldflow/workflow.py",
+      "bytes": 5290,
+      "sha256": "59d0ee273e07813b1babe4997b5f1fac05cecc4e9b62f132d8982c028e046981"
+    },
+    {
+      "path": "work/record_forms_review_v7.py",
+      "bytes": 2529,
+      "sha256": "d1a72c00359accb6d50a401f33c0ce270349960605fed374ae635b0a7cf5d4af"
+    },
+    {
+      "path": "work/requirements.lock.txt",
+      "bytes": 366,
+      "sha256": "dd63eceed644b8859618e80ecbc34c86ed84dbbb85eec3804fc7d305b98ad4ca"
+    },
+    {
+      "path": "work/tests/test_cli.py",
+      "bytes": 2926,
+      "sha256": "70efceec760bb863f90d267b1b652c29b2003597f315fe490f7c911363cfa571"
+    },
+    {
+      "path": "work/tests/test_contour_seam.py",
+      "bytes": 1023,
+      "sha256": "223c0d2a27efa6cdb269febc4f36e571c34f9b500f7c113cbc25252aa7bf7fc3"
+    },
+    {
+      "path": "work/tests/test_feature_edits.py",
+      "bytes": 1421,
+      "sha256": "5bed81b7d3cb13d2f7a454b95d324efb2d73d5ccc311686e721c118d4ce9e54c"
+    },
+    {
+      "path": "work/tests/test_feature_review.py",
+      "bytes": 1123,
+      "sha256": "d843c23a2a833c8d89fec08fa5ad395154b752fe525b86b83357ffe1925031ce"
+    },
+    {
+      "path": "work/tests/test_intersections.py",
+      "bytes": 1067,
+      "sha256": "c761900713493498d63ff36f6c67f7ee9799653cd167b89764d7ee6b62600844"
+    },
+    {
+      "path": "work/tests/test_local_insert.py",
+      "bytes": 938,
+      "sha256": "6870045f4fb9222e1366cf535bea37945d50f2a64669763693f73c266e31565a"
+    },
+    {
+      "path": "work/tests/test_local_smooth.py",
+      "bytes": 1533,
+      "sha256": "4813b80d5793b43e03dce15a607d89722bf91bea73c27db20e43d0bd9d6c45fc"
+    },
+    {
+      "path": "work/tests/test_partition.py",
+      "bytes": 841,
+      "sha256": "b1b45d1a97237a6973356539294496f02f965bf53909e0ba80ad90ea3b2efb43"
+    },
+    {
+      "path": "work/tests/test_pipeline.py",
+      "bytes": 1605,
+      "sha256": "d5f8d3ef3cd2a5e900ea8d5d96a3a2263da6bf9f16a72030f8e7d6adaeb36be9"
+    },
+    {
+      "path": "work/tests/test_print_orientation.py",
+      "bytes": 823,
+      "sha256": "406083122b0ddee2e3535391939472a1e861d5069b01841ab0db73567b288634"
+    },
+    {
+      "path": "work/tests/test_recess_edit.py",
+      "bytes": 821,
+      "sha256": "bb701431479222fdcef3687bb2f3907d6939c453c059aa5920cecc449995547c"
+    },
+    {
+      "path": "work/tests/test_release.py",
+      "bytes": 529,
+      "sha256": "24630d71367c3e1049561a025fa896fffa07800f9f4bb60391b144430039a5c7"
+    },
+    {
+      "path": "work/tests/test_release_depth.py",
+      "bytes": 1864,
+      "sha256": "d3e6cf0eca8a93b3c1d28514dbdeb2dae5de461c73dd7998536e8aaf080f512b"
+    },
+    {
+      "path": "work/tests/test_repair.py",
+      "bytes": 1247,
+      "sha256": "3f86929958733301d04e5f8929e44f30b4f87830a195357408ac8104706f94c9"
+    },
+    {
+      "path": "work/tests/test_review_cli.py",
+      "bytes": 3666,
+      "sha256": "9c2a0a712936966b778bbd50761d64e398ef2e934292e0aa17625b0f1ec261c9"
+    },
+    {
+      "path": "work/tests/test_review_context.py",
+      "bytes": 768,
+      "sha256": "3d4a177e9ac415c518343bf1c7b9ff649fbcac0a537942e9a1dfc81a6bcebf12"
+    },
+    {
+      "path": "work/tests/test_scene_artifact.py",
+      "bytes": 616,
+      "sha256": "ab2ce5facb55515d44b91978407f0f6215a3548d6be1eada881a045c68ac72f3"
+    },
+    {
+      "path": "work/tests/test_simplify.py",
+      "bytes": 865,
+      "sha256": "f804f2ad9fa638155e8e9c0552b695ff007061d44d7d77a92db589aff7b27b96"
+    },
+    {
+      "path": "work/tests/test_spout_warp.py",
+      "bytes": 938,
+      "sha256": "ecc118b20a46c39e26baa3cde30017a2d0fd22def476c7c9283c2ba21f8e33d9"
+    },
+    {
+      "path": "work/tests/test_tooling.py",
+      "bytes": 1036,
+      "sha256": "4685379507a5da3a5f1bdf29a61b6af75737fb17a68d21bc6c7c8d4631e4ae58"
+    },
+    {
+      "path": "work/tests/test_workflow.py",
+      "bytes": 4287,
+      "sha256": "07cf42a393682e93a5a2fe98101aecc134c11ec5722013e5b5a69853624bbecd"
+    }
+  ]
+}

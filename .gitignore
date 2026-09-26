@@ -1,0 +1,20 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+
+# Matplotlib cache
+mpl-cache/
+
+# macOS
+.DS_Store
+
+# Prototype snapshot: large, hash-recorded in snapshot-manifest.json.
+# baseline/ is re-extractable from the zip.
+prototype-snapshot.zip
+baseline/
+
+# Job run outputs
+jobs/

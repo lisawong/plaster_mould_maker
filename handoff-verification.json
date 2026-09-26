@@ -1,0 +1,23 @@
+{
+  "date": "2026-09-21",
+  "snapshot_files_verified": 96,
+  "zip_integrity": "passed",
+  "document_links": "passed",
+  "canonical_review_artifact_hashes": "passed",
+  "original_workspace_tests": {
+    "count": 45,
+    "result": "passed"
+  },
+  "extracted_snapshot_tests": {
+    "count": 45,
+    "result": "passed",
+    "environment": "Existing project Python virtual environment; not a fresh dependency installation"
+  },
+  "unverified": [
+    "Fresh installation on another host",
+    "Less capable model operation",
+    "Slicer and physical fabrication"
+  ],
+  "workspace_moved": false,
+  "committed_or_pushed": false
+}
