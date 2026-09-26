@@ -1,0 +1,56 @@
+{
+  "allowance_mm": 0.5,
+  "metric": "Linear penetration depth, not overlap volume",
+  "condition": "Manual finishing required; sampled motion only. Initial pose excluded from depth: generated halves and patterns are complementary Boolean solids at assembly.",
+  "checks": {
+    "plaster_1_vs_teapot": {
+      "max_upper_bound_mm": 0.23422307720696323,
+      "within_allowance_at_samples": true
+    },
+    "plaster_1_vs_printed_pattern": {
+      "max_upper_bound_mm": 0.23458685471462687,
+      "within_allowance_at_samples": true
+    },
+    "plaster_2_vs_teapot": {
+      "max_upper_bound_mm": 0.4825670955450571,
+      "within_allowance_at_samples": true
+    },
+    "plaster_2_vs_printed_pattern": {
+      "max_upper_bound_mm": 0.48256915230857844,
+      "within_allowance_at_samples": true
+    }
+  },
+  "print_ready": false,
+  "source_sha256": {
+    "work/base-diagnostic-v7/prepared_object.stl": "ec6375ecc43d696f230825966dc1730db0b5c0bb691602f109a620320499c729",
+    "work/base-diagnostic-v7/reference_plaster/plaster_1.stl": "8ad0f2e63d6ac409cf5142b469510e04f7384a8f89132044890f66f2d607e2c5",
+    "work/base-diagnostic-v7/reference_plaster/plaster_2.stl": "4a62b6be5fb6d347efe674dd8c2769033ee3a3d1611641d0dc56e50ae29383d7",
+    "work/base-diagnostic-v7/print_candidates/master_1.stl": "2c36b61ae457b1ae50efbe140364b18e4f83e9d43877e9e62b5d004e6c47569f",
+    "work/base-diagnostic-v7/print_candidates/master_2.stl": "584a41312d9ae46102d308a238d6ab03477d0fee5c9ebb73d98c36a6e6cd2f88"
+  },
+  "motion_samples_mm": [
+    0.025,
+    0.05,
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.75,
+    1,
+    1.5,
+    2,
+    3,
+    4,
+    8,
+    16,
+    32,
+    64
+  ],
+  "method": "Boundary distance upper bound plus half the smaller of oriented or axis-aligned enclosing slab thickness. Exactly lower-dimensional contacts excluded at 1e-10 mm rank tolerance.",
+  "limitations": [
+    "Not a continuous-motion certificate.",
+    "Penetration depth is not a map or guarantee of the exact sanding removal required.",
+    "Bound for half B is close to the 0.5 mm allowance. Physical trial still required."
+  ]
+}

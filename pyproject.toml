@@ -1,0 +1,63 @@
+[project]
+name = "mouldflow"
+version = "0.1.0"
+description = "STL -> plaster mould -> printable casting-form workflow"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+# Pinned to baseline/work/requirements.lock.txt (Stage 0 reproduces the prototype).
+# Loosen deliberately in a later stage, not incidentally.
+dependencies = [
+    "fast_simplification==0.2.0",
+    "manifold3d==3.5.3",
+    "matplotlib==3.11.2",
+    "networkx==3.6.1",
+    "numpy==2.5.3",
+    "pillow==12.3.0",
+    "rtree==1.4.1",
+    "scikit-image==0.26.0",
+    "scipy==1.18.1",
+    "trimesh==5.1.0",
+]
+
+[project.scripts]
+mouldflow = "mouldflow.__main__:main"
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.uv]
+# Transitive pins from the baseline lock, so uv.lock reproduces the verified environment.
+constraint-dependencies = [
+    "contourpy==1.4.0",
+    "cycler==0.12.1",
+    "fast_simplification==0.2.0",
+    "fonttools==4.65.0",
+    "ImageIO==2.37.4",
+    "kiwisolver==1.5.1",
+    "lazy-loader==0.5",
+    "manifold3d==3.5.3",
+    "matplotlib==3.11.2",
+    "networkx==3.6.1",
+    "numpy==2.5.3",
+    "packaging==26.3",
+    "pillow==12.3.0",
+    "pyparsing==3.3.2",
+    "python-dateutil==2.9.0.post0",
+    "rtree==1.4.1",
+    "scikit-image==0.26.0",
+    "scipy==1.18.1",
+    "six==1.17.0",
+    "tifffile==2026.9.15",
+    "trimesh==5.1.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mouldflow"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

@@ -1,0 +1,398 @@
+{
+  "status": "rejected_release_collision",
+  "print_ready": false,
+  "input": {
+    "dimensions_mm": [
+      80.48891830444336,
+      50.0,
+      37.60906219482422
+    ],
+    "volume_mm3": 49707.28145472434,
+    "nonmanifold_edges": 0,
+    "watertight": true,
+    "winding_consistent": true,
+    "vertices": 19844,
+    "triangles": 39688,
+    "strict_edge_face_crossings": 0,
+    "intersection_check_limitation": "Strict edge-face crossings only; coplanar overlaps and endpoint contacts may be missed. Zero is not a complete self-intersection proof."
+  },
+  "source_sha256": "528a1b934cdb656a18287958a34bcf25bd0459205a52e72bd46cb80e85c3c730",
+  "units": "mm",
+  "mode": "two_part",
+  "parts": {
+    "plaster_1": {
+      "dimensions_mm": [
+        104.48892211914062,
+        37.0,
+        61.60906219482422
+      ],
+      "volume_mm3": 212789.17486839974,
+      "nonmanifold_edges": 0,
+      "watertight": true,
+      "winding_consistent": true,
+      "vertices": 11684,
+      "triangles": 23364,
+      "fits_mk3_some_orientation": true
+    },
+    "plaster_2": {
+      "dimensions_mm": [
+        104.48892211914062,
+        39.5,
+        61.60906219482422
+      ],
+      "volume_mm3": 212934.95224435427,
+      "nonmanifold_edges": 0,
+      "watertight": true,
+      "winding_consistent": true,
+      "vertices": 11764,
+      "triangles": 23524,
+      "fits_mk3_some_orientation": true
+    },
+    "master_1": {
+      "dimensions_mm": [
+        112.48892211914062,
+        29.0,
+        69.60906219482422
+      ],
+      "volume_mm3": 56718.00519148656,
+      "nonmanifold_edges": 0,
+      "watertight": true,
+      "winding_consistent": true,
+      "vertices": 11692,
+      "triangles": 23380,
+      "fits_mk3_some_orientation": true
+    },
+    "master_2": {
+      "dimensions_mm": [
+        112.48892211914062,
+        29.0,
+        69.60906219482422
+      ],
+      "volume_mm3": 56572.22781553203,
+      "nonmanifold_edges": 0,
+      "watertight": true,
+      "winding_consistent": true,
+      "vertices": 11772,
+      "triangles": 23540,
+      "fits_mk3_some_orientation": true
+    },
+    "wall_1": {
+      "dimensions_mm": [
+        110.48892211914062,
+        37.0,
+        3.0
+      ],
+      "volume_mm3": 12264.27035522461,
+      "nonmanifold_edges": 0,
+      "watertight": true,
+      "winding_consistent": true,
+      "vertices": 8,
+      "triangles": 12,
+      "fits_mk3_some_orientation": true
+    },
+    "wall_2": {
+      "dimensions_mm": [
+        110.48892211914062,
+        37.0,
+        3.0
+      ],
+      "volume_mm3": 12264.27035522461,
+      "nonmanifold_edges": 0,
+      "watertight": true,
+      "winding_consistent": true,
+      "vertices": 8,
+      "triangles": 12,
+      "fits_mk3_some_orientation": true
+    },
+    "wall_3": {
+      "dimensions_mm": [
+        3.0,
+        37.0,
+        61.60906219482422
+      ],
+      "volume_mm3": 6838.605903625488,
+      "nonmanifold_edges": 0,
+      "watertight": true,
+      "winding_consistent": true,
+      "vertices": 8,
+      "triangles": 12,
+      "fits_mk3_some_orientation": true
+    },
+    "wall_4": {
+      "dimensions_mm": [
+        3.0,
+        37.0,
+        61.60906219482422
+      ],
+      "volume_mm3": 6838.605903625488,
+      "nonmanifold_edges": 0,
+      "watertight": true,
+      "winding_consistent": true,
+      "vertices": 8,
+      "triangles": 12,
+      "fits_mk3_some_orientation": true
+    }
+  },
+  "release": {
+    "plaster_1_vs_object": {
+      "passed": false,
+      "tolerance_mm3": 0.001,
+      "samples": [
+        {
+          "distance_mm": 0.0,
+          "intersection_mm3": 3.4484825543283176e-07
+        },
+        {
+          "distance_mm": 0.1,
+          "intersection_mm3": 0.04345342095469581
+        },
+        {
+          "distance_mm": 0.25,
+          "intersection_mm3": 0.07018601805005649
+        },
+        {
+          "distance_mm": 0.5,
+          "intersection_mm3": 0.0640312818112913
+        },
+        {
+          "distance_mm": 1.0,
+          "intersection_mm3": 0.018144977932176214
+        },
+        {
+          "distance_mm": 2.0,
+          "intersection_mm3": 0
+        },
+        {
+          "distance_mm": 4.0,
+          "intersection_mm3": 0
+        },
+        {
+          "distance_mm": 8.0,
+          "intersection_mm3": 0
+        },
+        {
+          "distance_mm": 16.0,
+          "intersection_mm3": 0
+        },
+        {
+          "distance_mm": 32.0,
+          "intersection_mm3": 0.0
+        },
+        {
+          "distance_mm": 64.0,
+          "intersection_mm3": 0.0
+        }
+      ],
+      "limitation": "Discrete positions only; does not prove continuous collision-free motion or physical release."
+    },
+    "plaster_2_vs_object": {
+      "passed": false,
+      "tolerance_mm3": 0.001,
+      "samples": [
+        {
+          "distance_mm": 0.0,
+          "intersection_mm3": 0.001606672944035381
+        },
+        {
+          "distance_mm": 0.1,
+          "intersection_mm3": 0.06592520334879737
+        },
+        {
+          "distance_mm": 0.25,
+          "intersection_mm3": 0.11639180913880409
+        },
+        {
+          "distance_mm": 0.5,
+          "intersection_mm3": 0.11908384573530384
+        },
+        {
+          "distance_mm": 1.0,
+          "intersection_mm3": 0.02222261518971891
+        },
+        {
+          "distance_mm": 2.0,
+          "intersection_mm3": 0
+        },
+        {
+          "distance_mm": 4.0,
+          "intersection_mm3": 0
+        },
+        {
+          "distance_mm": 8.0,
+          "intersection_mm3": 0
+        },
+        {
+          "distance_mm": 16.0,
+          "intersection_mm3": 0
+        },
+        {
+          "distance_mm": 32.0,
+          "intersection_mm3": 0.0
+        },
+        {
+          "distance_mm": 64.0,
+          "intersection_mm3": 0.0
+        }
+      ],
+      "limitation": "Discrete positions only; does not prove continuous collision-free motion or physical release."
+    },
+    "first_half_vs_second": {
+      "passed": true,
+      "tolerance_mm3": 0.001,
+      "samples": [
+        {
+          "distance_mm": 0.0,
+          "intersection_mm3": 9.473903143468002e-15
+        },
+        {
+          "distance_mm": 0.1,
+          "intersection_mm3": 0.0
+        },
+        {
+          "distance_mm": 0.25,
+          "intersection_mm3": 0.0
+        },
+        {
+          "distance_mm": 0.5,
+          "intersection_mm3": 0.0
+        },
+        {
+          "distance_mm": 1.0,
+          "intersection_mm3": 0.0
+        },
+        {
+          "distance_mm": 2.0,
+          "intersection_mm3": 0.0
+        },
+        {
+          "distance_mm": 4.0,
+          "intersection_mm3": 0.0
+        },
+        {
+          "distance_mm": 8.0,
+          "intersection_mm3": 0.0
+        },
+        {
+          "distance_mm": 16.0,
+          "intersection_mm3": 0.0
+        },
+        {
+          "distance_mm": 32.0,
+          "intersection_mm3": 0.0
+        },
+        {
+          "distance_mm": 64.0,
+          "intersection_mm3": 0.0
+        }
+      ],
+      "limitation": "Discrete positions only; does not prove continuous collision-free motion or physical release."
+    },
+    "plaster_1_vs_printed_master": {
+      "passed": false,
+      "tolerance_mm3": 0.001,
+      "samples": [
+        {
+          "distance_mm": 0.0,
+          "intersection_mm3": 0
+        },
+        {
+          "distance_mm": 0.1,
+          "intersection_mm3": 0.04345390563935325
+        },
+        {
+          "distance_mm": 0.25,
+          "intersection_mm3": 0.07018574435331477
+        },
+        {
+          "distance_mm": 0.5,
+          "intersection_mm3": 0.06403117392225492
+        },
+        {
+          "distance_mm": 1.0,
+          "intersection_mm3": 0.018144960887108635
+        },
+        {
+          "distance_mm": 2.0,
+          "intersection_mm3": 0
+        },
+        {
+          "distance_mm": 4.0,
+          "intersection_mm3": 0
+        },
+        {
+          "distance_mm": 8.0,
+          "intersection_mm3": 0
+        },
+        {
+          "distance_mm": 16.0,
+          "intersection_mm3": 0
+        },
+        {
+          "distance_mm": 32.0,
+          "intersection_mm3": 0.0
+        },
+        {
+          "distance_mm": 64.0,
+          "intersection_mm3": 0.0
+        }
+      ],
+      "limitation": "Discrete positions only; does not prove continuous collision-free motion or physical release."
+    },
+    "plaster_2_vs_printed_master": {
+      "passed": false,
+      "tolerance_mm3": 0.001,
+      "samples": [
+        {
+          "distance_mm": 0.0,
+          "intersection_mm3": 0
+        },
+        {
+          "distance_mm": 0.1,
+          "intersection_mm3": 0.0659236246438013
+        },
+        {
+          "distance_mm": 0.25,
+          "intersection_mm3": 0.1163912178355228
+        },
+        {
+          "distance_mm": 0.5,
+          "intersection_mm3": 0.11908318340609488
+        },
+        {
+          "distance_mm": 1.0,
+          "intersection_mm3": 0.022222399438627843
+        },
+        {
+          "distance_mm": 2.0,
+          "intersection_mm3": 0
+        },
+        {
+          "distance_mm": 4.0,
+          "intersection_mm3": 0
+        },
+        {
+          "distance_mm": 8.0,
+          "intersection_mm3": 0
+        },
+        {
+          "distance_mm": 16.0,
+          "intersection_mm3": 0
+        },
+        {
+          "distance_mm": 32.0,
+          "intersection_mm3": 0.0
+        },
+        {
+          "distance_mm": 64.0,
+          "intersection_mm3": 0.0
+        }
+      ],
+      "limitation": "Discrete positions only; does not prove continuous collision-free motion or physical release."
+    }
+  },
+  "limitations": [
+    "Sampled positions are not a continuous swept-volume proof.",
+    "No physical release, print finish, or plaster strength validation.",
+    "Top-cap mode is plaster design only; its casting forms are not generated."
+  ]
+}
