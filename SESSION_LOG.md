@@ -108,7 +108,7 @@ No implementation or test execution occurred this session. No changes committed 
 
 ### Open todos
 
-- [x] Stage 0 — scaffold, port baseline + 45 tests, commit V7 + historical fixtures, GitHub Actions CI (local green; CI result below).
+- [x] Stage 0 — scaffold, port baseline + 45 tests, commit V7 + historical fixtures, GitHub Actions CI (green locally and in CI: 53 passed on ubuntu, run 36218296190).
 - [ ] **User:** print `prints/groove-coupon/` and report best slot + fill-line legibility (A026).
 - [ ] **User:** choose second STL (blocks Stage 10).
 - [ ] Stages 1–11 per PLAN.md.
@@ -121,3 +121,4 @@ No implementation or test execution occurred this session. No changes committed 
 - Fixtures: `tests/fixtures/teapot-v7/` (7 files, hashes match snapshot manifest, `PROVENANCE.md`), `tests/fixtures/historical/` (~9.9 MB total).
 - CI: `.github/workflows/tests.yml` (ubuntu, setup-uv, `uv sync --locked`, pytest).
 - Notes for Stage 1: `mouldflow` has no `__init__.py` (namespace package, kept verbatim); trimesh divide-by-zero warnings persist (Stage 2 item); user's shell exports `VIRTUAL_ENV` from pyenv, which makes uv print a harmless warning.
+- CI run 36218296190 on ubuntu: `uv sync --locked` OK, **53 passed** — the macOS-captured pins install on Linux. Annotations only: Node 20 action deprecation, ubuntu-latest → Ubuntu 26 from 2026-10-19.
