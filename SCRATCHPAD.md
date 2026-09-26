@@ -56,7 +56,18 @@
 - **A026 Groove coupon print pending** `[question]`
   User to print `prints/groove-coupon/` (groove block + tongue) and report which slot (1–5 dots = 0.15–0.35 mm/side) gives a snug slide-in fit, and whether the 0.6 mm fill line is legible. Result sets the Stage 7 default clearance.
 
+- **A027 Cloud sessions for middle stages** `[proposal]`
+  Once Stage 0 lands, run Stages 1–4 and 6–8 as Claude Code on the web sessions that open PRs; Stage 9 (Blender) stays local.
+- **A028 Anthropic credit for review and evaluation** `[evidence]`
+  User has Anthropic cloud credit and Claude connected to GitHub. Candidate uses: `/code-review ultra` on geometry-heavy PRs (Stages 2, 4, 7) and the 36-run Stage 11 evaluation.
+- **A029 CI gates every PR** `[constraint]`
+  GitHub Actions runs the full test suite on push/PR so cloud or `@claude` work shows green/red before merge.
+
 ## Decisions
+
+- 2026-09-26: One PR per stage, merged by the user after CI is green. Stage 0 delivered as PR #1.
+
+- 2026-09-26: Stage 0 expanded: add GitHub Actions CI (Linux) and commit the V7 teapot fixtures (`tests/fixtures/teapot-v7/`) plus the historical scene fixtures, so the repo is self-sufficient for cloud sessions. Dependencies pinned `==` to baseline versions for reproduction; loosen deliberately later.
 
 - 2026-09-24: PLAN.md approved and saved (12 stages, 0–11). Teapot plaster regression moved directly after the plaster-generation stage (now Stage 5). pydantic v2 chosen for schemas. Groove test coupon generated ahead of Stage 7 for an early physical fit test.
 - 2026-09-24: Git repo initialized (`main`). `baseline/` and `prototype-snapshot.zip` are git-ignored; the tracked `snapshot-manifest.json` records their hashes.

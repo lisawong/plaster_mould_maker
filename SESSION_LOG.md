@@ -75,7 +75,7 @@ No implementation or test execution occurred this session. No changes committed 
 - Drafted and iterated `PRD.md` with the user; saved on approval. Key calls: Release 1 = planar two-part (complex moulds → Release 2); 0.1 mm default finishing allowance; 3 mm wall = lip thickness; 20 mm lips; tongue-and-groove seams at 0.25 mm/side clearance; walls 30 mm above plaster; debossed fill line; evaluate on Sonnet 5 + Haiku 4.5. Second STL deferred.
 ### Step 3 — git, plan, groove coupon
 
-- `git init -b main` with `.gitignore` (venvs, caches, `baseline/`, snapshot zip, `jobs/`). Nothing committed yet at this point.
+- `git init -b main` with `.gitignore` (venvs, caches, `baseline/`, snapshot zip, `jobs/`). Later committed as `b9c3755` and pushed to https://github.com/lisawong/plaster_mould_maker.
 - `PLAN.md` approved and saved: Stages 0–11; teapot regression moved to Stage 5 (after plaster generation); pydantic v2 confirmed.
 - Groove test coupon (TDD): `tests/test_groove_coupon.py` (8 tests, red → green) + `tools/groove_coupon.py`; exported `prints/groove-coupon/groove-block.stl` (29.5 × 32 × 8 mm, 5 slots at 0.15–0.35 mm/side, dot-indexed) and `tongue.stl` (30 × 20 × 3 mm with 0.6 mm fill line). Reimported: both watertight. Currently run with the baseline venv until Stage 0 creates the project venv.
 
@@ -98,3 +98,43 @@ No implementation or test execution occurred this session. No changes committed 
 - [ ] Stage 2 — known-answer fixtures, depth-semantics audit, adaptive sampling, `inconclusive`; investigate trimesh divide-by-zero warnings.
 - [ ] Stages 3–11 per PLAN.md.
 - [ ] Optional: add a git remote (none configured).
+
+## 2026-09-26 16:33 NZST — Session start
+
+- Session state: clean start (previous session wrapped 2026-09-24; initial commit `b9c3755` pushed to GitHub).
+- Agent: Claude Code.
+- Goal: plan how to use GitHub + Anthropic cloud credit; implement Stage 0.
+- Discussed: Claude Code on the web for cloud stage sessions, `/code-review ultra` on geometry-heavy PRs, `@claude` GitHub mentions, credits for the Stage 11 evaluation. Blender (Stage 9) stays local. Added CI + fixture commits to Stage 0 so cloud sessions can work from the repo alone.
+
+### Open todos
+
+- [x] Stage 0 — scaffold, port baseline + 45 tests, commit V7 + historical fixtures, GitHub Actions CI (green locally and in CI: 53 passed on ubuntu, run 36218296190).
+- [ ] **User:** print `prints/groove-coupon/` and report best slot + fill-line legibility (A026).
+- [ ] **User:** choose second STL (blocks Stage 10).
+- [ ] Stages 1–11 per PLAN.md.
+
+### Stage 0 — work done (branch `stage-0-scaffold`)
+
+- Tests + fixtures copied first → 19 collection errors (red); then `pyproject.toml` (hatchling, src layout, deps + transitive constraints pinned to baseline lock), `uv.lock`, `Makefile`, package ported → **53 passed** (45 baseline + 8 coupon).
+- Port verified byte-identical to baseline (package and 44 tests); only `test_scene_artifact.py` changed (fixture path + HISTORICAL docstring).
+- `uv sync` initially pulled a newer transitive `tifffile`; fixed with `[tool.uv] constraint-dependencies`.
+- Fixtures: `tests/fixtures/teapot-v7/` (7 files, hashes match snapshot manifest, `PROVENANCE.md`), `tests/fixtures/historical/` (~9.9 MB total).
+- CI: `.github/workflows/tests.yml` (ubuntu, setup-uv, `uv sync --locked`, pytest).
+- Notes for Stage 1: `mouldflow` has no `__init__.py` (namespace package, kept verbatim); trimesh divide-by-zero warnings persist (Stage 2 item); user's shell exports `VIRTUAL_ENV` from pyenv, which makes uv print a harmless warning.
+- CI run 36218296190 on ubuntu: `uv sync --locked` OK, **53 passed** — the macOS-captured pins install on Linux. Annotations only: Node 20 action deprecation, ubuntu-latest → Ubuntu 26 from 2026-10-19.
+
+### Wrap — 2026-09-26 session closed
+
+- Agent: Claude Code.
+- [x] Mapped GitHub + Anthropic credit options onto the plan (cloud stage sessions, `/code-review ultra`, `@claude`, Stage 11 evaluation); recorded as A027–A029 and a PLAN working-mode section.
+- [x] Stage 0 complete on `stage-0-scaffold`: package ported verbatim, 53 tests green locally and in CI, V7 + historical fixtures with provenance, pinned `uv.lock`.
+- [x] Opened PR #1: https://github.com/lisawong/plaster_mould_maker/pull/1 (not merged).
+
+### Open todos
+
+- [ ] **User:** review and merge PR #1.
+- [ ] **User:** print `prints/groove-coupon/` and report best slot + fill-line legibility (A026).
+- [ ] **User:** choose second STL (blocks Stage 10).
+- [ ] Stage 1 — job folder, pydantic schemas, hash-bound gate state machine; add `mouldflow/__init__.py`; bump CI actions off Node 20. Candidate first cloud session (claude.ai/code).
+- [ ] Stage 2 — known-answer fixtures, depth audit, adaptive sampling, `inconclusive`; trimesh divide-by-zero warnings.
+- [ ] Stages 3–11 per PLAN.md.

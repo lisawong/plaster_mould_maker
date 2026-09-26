@@ -1,0 +1,8 @@
+{
+  "target_mm": 50,
+  "scale_axis": "Y",
+  "mode": "two_part",
+  "margin": 12,
+  "backing": 12,
+  "gate_radius": 5
+}
