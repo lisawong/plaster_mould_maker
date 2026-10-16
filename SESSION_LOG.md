@@ -212,7 +212,7 @@ No implementation or test execution occurred this session. No changes committed 
 
 ### Open todos
 
-- [ ] **User:** review and merge the Stage 2 PR once CI is green; decide A032 (strict_pass wording).
+- [ ] **User:** review and merge PR #4 (https://github.com/lisawong/plaster_mould_maker/pull/4) once CI is green; decide A032 (strict_pass wording).
 - [ ] **User:** print `prints/groove-coupon/` and report best slot + fill-line legibility (A026).
 - [ ] **User:** choose second STL (blocks Stage 10).
 - [ ] Retire prototype `workflow.ReviewWorkflow` once commands route through `job.Job` (R10.2).
