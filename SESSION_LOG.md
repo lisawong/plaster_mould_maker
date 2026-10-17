@@ -233,3 +233,40 @@ No implementation or test execution occurred this session. No changes committed 
 - The pin withdrawals now pass `strict_pass` in 0.4 s with 2 samples. Result: **143 passed**.
 - Teapot full assessment (exploratory): half A conditional_finishing in 187 s (measured 0.066 mm, certified < 0.4995 mm), half B conditional_finishing in 174 s (measured 0.097 mm, certified < 0.4995 mm) at the demo's 0.5 mm allowance, 2 samples each (0 and clearance).
 - Not addressed (out of scope): older modules (`simplify.py`, `print_layout.py`, `contour_seam.py`, `review.py`) still call trimesh `volume`/`is_volume` and can emit the same warnings.
+
+## 2026-10-17 — Project review and Stage 2.5 (local session, branch `claude/stage-2-5-view`)
+
+- Agent: Claude Code (desktop app), Opus 5.5.
+- Session state: PR #4 merged; clean `main`; 143 tests green locally, CI green on main.
+
+### Review of the post-Stage-2 state
+
+- Healthy: 143 tests, CI green; release checks now cover the whole motion (swept intervals, erosion certificates), and all five outcomes are tested.
+- Docs were stale: PLAN said Stage 2 "PR #4 open" and README said "in review". Both fixed here.
+- Carried risks: teapot assessment takes about 3 min per half (A033, matters for Stage 5); prototype `workflow.ReviewWorkflow` is still unretired; one baseline trimesh warning remains; older modules still use trimesh `volume`.
+- User asked for a way to inspect geometry visually as we go (A034) → Stage 2.5.
+
+### Work done
+
+- Tests first: `tests/test_view.py` (16 tests) failed at import before `view.py` existed. A doc-vs-CLI drift test (2 cases) was added after the skill and agent files.
+- `view.py` + `mouldflow view`: `views.png`, `sections.png`, `viewer.html`, result record; `--up`, `--explode`, `--section`, `--mark`, `--marks-from`, `--no-html`, `--max-preview-faces`.
+- `.claude/skills/look/SKILL.md` (`/look`), `.claude/agents/mould-inspector.md`, `.claude/launch.json` (`look` server), `look/` git-ignored.
+- Tried on the teapot V7 fixtures. Render takes about 10 s. Sections show the cavity, keys and handle hole clearly. The viewer was checked in the browser pane: part toggles, section plane and zoom-to-mark all work.
+- Bugs found by looking: meshes marked always-transparent hid the red mark box, so transparency now turns on only when opacity < 1; the control panel covered the zoom target, so it is now collapsible (collapsed on narrow screens).
+- Result: **161 passed** locally.
+
+### Notes for later stages
+
+- Stage 4: pass `assess_release` output (as JSON) to `--marks-from` and add a `--section` through the catch.
+- The teapot is Z-up; its split plane Y=0 is vertical, so use `--explode y=…`.
+- Exploded PNG views still hide inward-facing cavities. Use sections, the viewer's section plane, or render one half alone.
+- `mould-inspector` was written but not yet run end-to-end (agent definitions load at session start).
+
+### Open todos
+
+- [ ] **User:** review the Stage 2.5 branch; push/PR when happy.
+- [ ] Try `mould-inspector` in a fresh session on the teapot halves.
+- [ ] **User:** print `prints/groove-coupon/` and report best slot + fill-line legibility (A026).
+- [ ] **User:** choose second STL (blocks Stage 10).
+- [ ] Retire prototype `workflow.ReviewWorkflow` once commands route through `job.Job` (R10.2).
+- [ ] Stages 3–11 per PLAN.md.

@@ -4,6 +4,8 @@
 `mouldflow job status DIR`    reverify hashes and report every gate and the next action
 `mouldflow job decide DIR GATE --revision R --answer approve|request_changes --note TEXT`
                               record an explicit human decision on a pending gate
+`mouldflow view MESH[=LABEL]... --out DIR`
+                              render views.png, sections.png and a rotatable viewer.html
 
 Any other first argument runs the prototype generator (`mouldflow STL --config ... --out ...`).
 """
@@ -17,6 +19,7 @@ from pydantic import ValidationError
 from .job import GATES, Job, JobError
 from .result import ResultRecord
 from .settings import JobSettings
+from .view import MAX_PREVIEW_FACES, ViewError, inspect
 
 
 def _parser():
@@ -36,6 +39,21 @@ def _parser():
     decide.add_argument('--revision', required=True)
     decide.add_argument('--answer', help='approve or request_changes; omitting it never approves')
     decide.add_argument('--note', required=True, help="the human's decision in their words")
+    view = groups.add_parser('view', help='render PNG views, sections and an HTML viewer of meshes')
+    view.add_argument('meshes', nargs='+', help='mesh files, optionally PATH=LABEL')
+    view.add_argument('--out', type=Path, required=True, help='folder for views.png, sections.png, viewer.html')
+    view.add_argument('--section', action='append', default=[], metavar='AXIS=MM',
+                      help='cross-section plane (repeatable; default: through the scene centre on x, y, z)')
+    view.add_argument('--explode', metavar='AXIS=MM', help='push parts apart from the scene centre along AXIS')
+    view.add_argument('--mark', action='append', default=[], metavar='X0,Y0,Z0,X1,Y1,Z1',
+                      help='highlight a box in mm (repeatable)')
+    view.add_argument('--marks-from', action='append', default=[], type=Path, metavar='RECORD.json',
+                      help='highlight worst_location from a release assessment or its result record')
+    view.add_argument('--up', choices=('x', 'y', 'z'), default='z', help='axis drawn vertically (default z)')
+    view.add_argument('--title')
+    view.add_argument('--no-html', action='store_true', help='skip viewer.html')
+    view.add_argument('--max-preview-faces', type=int, default=MAX_PREVIEW_FACES,
+                      help='decimate larger meshes for the PNG views only')
     return parser
 
 
@@ -52,8 +70,20 @@ def _ok(command, job):
                         evidence=['job.json', 'state.json'])
 
 
+def _view(args):
+    return inspect(args.meshes, args.out, sections=args.section, explode_spec=args.explode, marks=args.mark,
+                   marks_from=args.marks_from, up=args.up, title=args.title, html_viewer=not args.no_html,
+                   max_preview_faces=args.max_preview_faces)
+
+
 def run(argv):
     args = _parser().parse_args(argv)
+    if args.group == 'view':
+        try:
+            return 0, _view(args)
+        except (ViewError, OSError, ValueError) as error:
+            return 2, ResultRecord(command='view', status='error', error=str(error),
+                                   next_action='Fix the reported mesh path or option and rerun `mouldflow view`.')
     command = f'{args.group} {args.command}'
     try:
         if args.command == 'init':
@@ -71,7 +101,7 @@ def run(argv):
 
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
-    if argv and argv[0] not in ('job', '-h', '--help'):
+    if argv and argv[0] not in ('job', 'view', '-h', '--help'):
         from .__main__ import main as prototype_main
         sys.argv = [sys.argv[0], *argv]
         return prototype_main()

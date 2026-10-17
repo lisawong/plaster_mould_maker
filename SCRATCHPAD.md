@@ -71,8 +71,14 @@
   Resolved by the swept intervals: `strict_pass` now means contact only (≤ contact tolerance) over the whole motion, not just at samples.
 - **A033 Teapot assessment cost** `[question]`
   Sweeps and erosions remove the dense-sampling requirement (a clean 60 mm withdrawal at 0.1 mm now takes 2 samples). V7 cost: half A conditional_finishing in 187 s (measured 0.066 mm, certified < 0.4995 mm), half B conditional_finishing in 174 s (measured 0.097 mm, certified < 0.4995 mm) at the demo's 0.5 mm allowance, 2 samples each (0 and clearance). Stage 5 should confirm this is practical for the regression.
+- **A034 Visual inspection while building** `[decision]`
+  (2026-10-17, user) Be able to look at the geometry at each step, not only read metrics. Combine standard commands/skills with an agent that iterates (render → look → adjust). Candidate pieces: a `mouldflow view` command (PNG contact sheets + rotatable HTML), a `/look` project skill, a `mould-inspector` subagent, and possibly pulling the Stage 9 headless-Blender spike forward (Blender 5.2.2 is installed locally). Overlaps Stage 3 previews and Stage 9 review packages. Built as Stage 2.5 (matplotlib PNGs + three.js HTML first; Blender stays in Stage 9).
+- **A035 Pictures never decide outcomes** `[constraint]`
+  `mouldflow view` output, `/look` and `mould-inspector` describe what they see; release outcomes come only from `release_check`. Numbers are quoted from result records, never estimated from pixels.
 
 ## Decisions
+
+- 2026-10-17: Stage 2 merged (PR #4). Stage 2.5 added: visual inspection toolkit. `mouldflow view` (PNG views, filled sections, self-contained three.js `viewer.html` pinned to three@0.160.0 on jsDelivr), project skill `/look`, agent `mould-inspector`, `look/` output folder (git-ignored) served by `.claude/launch.json` → `look` on port 8765. Section planes that pass exactly through vertex rings are nudged by 1e-6 × extent and the nudge is recorded.
 
 - 2026-10-17: Code review of PR #4 fixed. Swept intervals (Minkowski sums) replace dense sampling between poses; erosion certificates (Minkowski differences) prove depth below the allowance and contact-only; zero-area faces are input warnings, not `unsupported`; the reported catch location is the deepest component; per-side bounds only tighten, so records are self-consistent.
 

@@ -6,7 +6,7 @@ Build a repeatable STL → plaster mould → printable plaster-casting-form work
 
 Release 1 supports two-part plaster moulds from a single planar split, with deterministic checks, resumable jobs and hash-bound human review gates (input → plaster → forms → export). Release 2 targets more complex moulds. Printed casting forms use 3 mm walls with 20 mm outward lips, printed tongue-and-groove seams locked by external bulldog-style clips, walls 30 mm above the plaster block and a debossed fill line. The default finishing allowance is 0.1 mm per job. The finished skill will be evaluated on Sonnet 5 and Haiku 4.5.
 
-The accepted teapot demo is prototype evidence, not proof of general applicability. Its casting forms remain awaiting human review. See [PRD.md](PRD.md) for requirements and [PLAN.md](PLAN.md) for the staged build. Progress: Stages 0–1 merged (scaffold + CI; job folder, schemas and review gates); Stage 2 (known-answer fixtures, depth-semantics audit, `release_check`) in review.
+The accepted teapot demo is prototype evidence, not proof of general applicability. Its casting forms remain awaiting human review. See [PRD.md](PRD.md) for requirements and [PLAN.md](PLAN.md) for the staged build. Progress: Stages 0–2 merged (scaffold + CI; job folder, schemas and review gates; known-answer fixtures, depth-semantics audit, `release_check`); Stage 2.5 (visual inspection: `mouldflow view`, `/look`, `mould-inspector`) in progress.
 
 ## Quick start
 
@@ -18,7 +18,15 @@ uv run mouldflow --help
 uv run mouldflow job init path/to/job      # new job folder (settings, gates, artifact folders)
 uv run mouldflow job status path/to/job    # reverify hashes; gates + next_action as JSON
 uv run mouldflow job decide path/to/job input --revision REV --answer approve --note "..."
+uv run mouldflow view a.stl=object b.stl=half_1 --out look/demo --explode y=25 --marks-from release.json
 ```
+
+## Looking at geometry
+
+`mouldflow view` writes `views.png`, `sections.png` and a rotatable `viewer.html` into `look/<name>/` (git-ignored). In Claude Code:
+- `/look [what]` renders, reads the pictures and reports what it sees, then offers the rotatable viewer (the `look` server in `.claude/launch.json` serves `look/` on http://localhost:8765).
+- The `mould-inspector` agent repeats render → look → adjust sections/explode/marks until a question is answered, and writes `look/<name>/FINDINGS.md`.
+Pictures are inspection aids. Outcomes always come from the release checks.
 
 ## Structure
 
@@ -38,7 +46,10 @@ uv run mouldflow job decide path/to/job input --revision REV --answer approve --
   Stage 2 added:
   - `release_check.py` — `assess_release`: two-sided penetration depth (mm) over the whole motion (samples plus Minkowski-swept intervals, erosion certificates), adaptive refinement and `strict_pass` / `conditional_finishing` / `inconclusive` / `fail` / `unsupported`.
   - `known_answers.py` — known-answer release fixtures for the EVALUATION-PLAN geometry rows.
-- `tests/` — pytest suite: 45 ported baseline tests, coupon tests, Stage 1 job/schema tests and Stage 2 known-answer release tests.
+  Stage 2.5 added:
+  - `view.py` — `mouldflow view`: PNG contact sheet, cross-sections and self-contained three.js viewer, with release-catch marks.
+- `.claude/skills/look/`, `.claude/agents/mould-inspector.md`, `.claude/launch.json` — visual-inspection skill, iterating inspector agent and the `look` preview server.
+- `tests/` — pytest suite: 45 ported baseline tests, coupon tests, Stage 1 job/schema tests, Stage 2 known-answer release tests and Stage 2.5 view tests.
   - `tests/fixtures/teapot-v7/` — accepted V7 source, prepared object and plaster halves for the Stage 5 regression; see its `PROVENANCE.md`.
   - `tests/fixtures/historical/` — older three-part study used only by `test_scene_artifact` (historical, not V7 evidence).
 - `tools/groove_coupon.py` — generator for the groove-clearance test print.

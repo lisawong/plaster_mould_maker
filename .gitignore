@@ -18,3 +18,6 @@ baseline/
 
 # Job run outputs
 jobs/
+
+# mouldflow view output (inspection pictures; regenerate with `mouldflow view`)
+/look/

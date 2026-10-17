@@ -28,10 +28,16 @@ The PR template (`.github/pull_request_template.md`) carries this checklist.
 - **Tests (first):** pending gate blocks; missing answer ≠ approval; upstream change invalidates downstream; relocation reverifies, never reapproves; per-job allowance doesn't leak.
 
 ## Stage 2 — Known-answer fixtures & depth-semantics audit
-- **Status:** PR #4 open (branch `claude/stage-2-f3zrxy`) — 143 tests green locally. Added two-sided depth, Minkowski-swept intervals and erosion certificates beyond the planned audit (see TECHNICAL-REFERENCE, Stage 2 audit).
+- **Status:** done — PR #4 merged 2026-10-17 (143 tests green in CI). Added two-sided depth, Minkowski-swept intervals and erosion certificates beyond the planned audit (see TECHNICAL-REFERENCE, Stage 2 audit).
 - **Build:** fixture library for each EVALUATION-PLAN row (thin-wide overlap, deep catch, zero-thickness contact, near-coplanar sliver, between-sample catch, self-intersecting mesh). Audit `release_depth`; add adaptive sample refinement near the allowance; add `inconclusive`. Investigate the trimesh divide-by-zero warnings seen in the baseline run.
 - **Trade-off:** adaptive sampling (Release 1) vs continuous collision detection (research). Unresolvable → `inconclusive`.
 - **Tests (first):** each fixture asserts metric unit (mm vs mm³), bound-vs-measured and outcome.
+
+## Stage 2.5 — Visual inspection toolkit (added 2026-10-17)
+- **Status:** in progress on branch `claude/stage-2-5-view` (161 tests green locally).
+- **Why:** look at the geometry as each later stage is built, not only at metrics (SCRATCHPAD A034). It brings forward part of Stage 3's PNG previews and Stage 9's review assets without replacing Stage 9.
+- **Build:** `mouldflow view MESH[=LABEL]... --out DIR` writes `views.png` (four angles), `sections.png` (filled cross-sections, holes open) and a self-contained `viewer.html` (three.js, parts toggle/opacity, section plane, zoom-to-mark), and prints a `mouldflow.result/1` record. Options: `--up`, `--explode`, `--section`, `--mark`, `--marks-from` (a release record's `worst_location`). Project skill `/look`, agent `mould-inspector` (render → look → adjust loop, writes `look/<name>/FINDINGS.md`), `look` server in `.claude/launch.json`.
+- **Tests (first):** marks from both record shapes; explode direction; section loop counts (ring = 2, miss = 0); red mark pixels appear; HTML embeds every mesh at full face count, escapes labels, pins three.js; CLI record and JSON errors; skill/agent docs use only real flags.
 
 ## Stage 3 — Intake & prepare
 - **Build:** `mouldflow intake`, `mouldflow prepare`: hash source, require units, validate mesh, apply scale/orientation as a new revision, simple PNG previews for the input gate.
@@ -61,7 +67,7 @@ The PR template (`.github/pull_request_template.md`) carries this checklist.
 
 ## Stage 9 — Review packages
 - **Build:** locator / marked close-up / before-after / Blender scene script generator. Short, time-boxed headless Blender spike (`--gpu-backend`, factory startup) first; fall back to UI-console scripts.
-- **Interim:** Stages 3–8 use simple PNG previews until this lands.
+- **Interim:** Stages 3–8 use `mouldflow view` (Stage 2.5) until this lands; Stage 9 builds on it (exact-geometry packages, Blender scenes).
 - **Tests (first):** every geometry review has all required views; annotation meshes never reach printable STLs; scene meshes match hashed artifacts.
 
 ## Stage 10 — Second STL & unsupported cases
