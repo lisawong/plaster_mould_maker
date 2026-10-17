@@ -66,13 +66,15 @@
 - **A030 Two-sided release depth** `[evidence]`
   Depth below the fixed surface alone is ≤ half the fixed feature's thickness, so it misses parts sweeping through thin fixed walls. Stage 2 uses max(depth below fixed, depth below moving).
 - **A031 Whole-motion depth bound** `[evidence]`
-  Two-sided depth is 1-Lipschitz in travel, so sampled upper bounds give a proven bound between samples. Releases are covered from 0 to the clearance distance.
-- **A032 strict_pass wording** `[question]`
-  `strict_pass` = contact-only at every sample and the whole-motion bound below the allowance; between samples depth is bounded, not proven zero. Confirm this is acceptable, or require a tighter between-sample bound (costs many more samples).
-- **A033 Teapot sample cost** `[question]`
-  The whole-motion bound needs sample gaps below 2× the allowance where depth is zero, and much finer ones near it. One refined V7 pose took 4–12 minutes. Stage 5 needs faster containment/distance queries, or an explicit and recorded treatment of the complementary initial pose, before the V7 regression is practical.
+  Releases are covered from 0 to the clearance distance. Between samples, Minkowski sweeps give the exact union of overlaps over the travel interval; erosion certificates prove "below r deep" for thin/shell overlaps. The 1-Lipschitz bound remains as a second interval bound.
+- **A032 strict_pass wording** `[evidence]`
+  Resolved by the swept intervals: `strict_pass` now means contact only (≤ contact tolerance) over the whole motion, not just at samples.
+- **A033 Teapot assessment cost** `[question]`
+  Sweeps and erosions remove the dense-sampling requirement (a clean 60 mm withdrawal at 0.1 mm now takes 2 samples). V7 cost: half A conditional_finishing in 187 s (measured 0.066 mm, certified < 0.4995 mm), half B conditional_finishing in 174 s (measured 0.097 mm, certified < 0.4995 mm) at the demo's 0.5 mm allowance, 2 samples each (0 and clearance). Stage 5 should confirm this is practical for the regression.
 
 ## Decisions
+
+- 2026-10-17: Code review of PR #4 fixed. Swept intervals (Minkowski sums) replace dense sampling between poses; erosion certificates (Minkowski differences) prove depth below the allowance and contact-only; zero-area faces are input warnings, not `unsupported`; the reported catch location is the deepest component; per-side bounds only tighten, so records are self-consistent.
 
 - 2026-09-26: Stage 2 depth audit. New release checks go through `release_check.assess_release` (two-sided depth, Lipschitz whole-motion bound, adaptive spatial/temporal refinement, `inconclusive` when unresolved, `unsupported` for invalid solids). Prototype `check_release` / `check_release_depth` keep their behaviour for the baseline. Contact tolerance 1e-3 mm. trimesh divide-by-zero warnings traced to mass-property volume on zero-volume Booleans; fixed with `solid_volume` / `is_solid`.
 

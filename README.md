@@ -36,7 +36,7 @@ uv run mouldflow job decide path/to/job input --revision REV --answer approve --
   - `job.py` — job folder and the four hash-bound review gates (input → plaster → forms → export).
   - `cli.py` — `mouldflow job init|status|decide`; other arguments fall through to the prototype generator.
   Stage 2 added:
-  - `release_check.py` — `assess_release`: two-sided penetration depth (mm) with a whole-motion bound, adaptive refinement and `strict_pass` / `conditional_finishing` / `inconclusive` / `fail` / `unsupported`.
+  - `release_check.py` — `assess_release`: two-sided penetration depth (mm) over the whole motion (samples plus Minkowski-swept intervals, erosion certificates), adaptive refinement and `strict_pass` / `conditional_finishing` / `inconclusive` / `fail` / `unsupported`.
   - `known_answers.py` — known-answer release fixtures for the EVALUATION-PLAN geometry rows.
 - `tests/` — pytest suite: 45 ported baseline tests, coupon tests, Stage 1 job/schema tests and Stage 2 known-answer release tests.
   - `tests/fixtures/teapot-v7/` — accepted V7 source, prepared object and plaster halves for the Stage 5 regression; see its `PROVENANCE.md`.

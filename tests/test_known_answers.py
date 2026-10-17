@@ -115,7 +115,10 @@ class KnownAnswerOutcomeTests(unittest.TestCase):
     def test_catch_between_coarse_samples_is_found(self):
         f, report = run('between-sample-catch')
         self.assertEqual(report['outcome'], 'fail')
-        self.assertGreater(len(report['samples']), len(f.distances))
+        # The swept interval between the coarse samples 5 and 5.65 (clearance) holds the catch.
+        travel = report['worst_location']['travel_mm']
+        self.assertLessEqual(travel[0], 5.35)
+        self.assertGreaterEqual(travel[1], 5.35)
         # The legacy checks only look at the coarse samples and miss the catch.
         self.assertTrue(check_release_depth(f.moving, f.fixed, f.direction, f.distances, f.allowance_mm)['within_allowance_at_samples'])
         self.assertTrue(check_release(f.moving, f.fixed, f.direction, f.distances)['passed'])
@@ -138,9 +141,25 @@ class KnownAnswerOutcomeTests(unittest.TestCase):
         f, report = run('clean-withdrawal')
         self.assertEqual(report['outcome'], 'strict_pass')
         self.assertTrue(all(s['upper_bound_mm'] == 0 for s in report['samples']))
-        # Zero at every sample; between samples only the Lipschitz bound, stated as a limitation.
-        self.assertLess(report['metrics']['max_depth_upper_bound']['value'], f.allowance_mm)
-        self.assertTrue(any('Between samples' in item for item in report['limitations']))
+        # Between samples the swept check proves contact only, not just a bound below the allowance.
+        self.assertTrue(report['intervals'])
+        self.assertTrue(all(i['contact_only'] for i in report['intervals']))
+        self.assertLessEqual(report['metrics']['max_depth_upper_bound']['value'], report['contact_tolerance_mm'])
+
+    def test_long_sliding_withdrawal_at_default_allowance_is_strict_and_cheap(self):
+        f, report = run('long-sliding-withdrawal')
+        self.assertEqual(f.allowance_mm, .1)
+        self.assertGreater(report['clearance_mm'], 50)
+        self.assertEqual(report['outcome'], 'strict_pass', report['reason'])
+        # Sample spacing no longer has to fall below twice the allowance (~300 samples here).
+        self.assertLessEqual(len(report['samples']), 4)
+
+    def test_catch_location_is_the_deepest_component_not_the_largest(self):
+        f, report = run('wide-sliver-and-deep-catch')
+        self.assertEqual(report['outcome'], 'fail')
+        lo, hi = report['worst_location']['bounds_mm']
+        self.assertGreaterEqual(lo[1], 1.9)          # the small deep catch sits at y in [2, 2.3]
+        self.assertLessEqual(hi[1], 2.4)
 
 
 class AssessmentContractTests(unittest.TestCase):
@@ -165,10 +184,44 @@ class AssessmentContractTests(unittest.TestCase):
         self.assertEqual(distances[0], 0)
         self.assertAlmostEqual(distances[-1], report['clearance_mm'])
 
-    def test_sample_budget_exhaustion_is_inconclusive(self):
-        _, report = run('between-sample-catch', max_samples=10)
-        self.assertEqual(report['outcome'], 'inconclusive')
-        self.assertIn('budget', report['reason'])
+    def test_erosion_certificate_resolves_a_loose_bound_without_cell_refinement(self):
+        f, report = run('bound-wider-than-depth', interior_cells=0)
+        self.assertEqual(report['outcome'], 'conditional_finishing')
+        start = report['samples'][0]
+        # Nothing is 0.4995 mm deep on either side: proven by eroding each solid and
+        # intersecting, not by the (loose) slab bound.
+        self.assertAlmostEqual(start['erosion_certified_below_mm'], f.allowance_mm * (1 - 1e-3))
+        self.assertLess(start['upper_bound_mm'], f.allowance_mm)
+
+    def test_records_agree_with_their_per_side_bounds(self):
+        for name in FIXTURES:
+            _, report = run(name)
+            for item in report['samples'] + report.get('intervals', []):
+                with self.subTest(name=name, item=item.get('distance_mm', item.get('travel_mm'))):
+                    sides = max(item['fixed_side_mm'][1], item['moving_side_mm'][1])
+                    self.assertAlmostEqual(item['upper_bound_mm'], max(sides, item['measured_depth_mm']), places=12)
+
+    def test_degenerate_faces_are_a_warning_not_unsupported(self):
+        import numpy as np
+        import trimesh
+        from mouldflow.pipeline import box_between
+        from mouldflow.release_check import solid_problems
+        box = box_between([-5, -5, -5], [5, 5, 5])
+        faces = [list(f) for f in box.faces]
+        # Split edge a->b of the first face at a midpoint m and close the slit with the
+        # zero-area triangle (a, b, m), as Boolean output can carry: still closed and wound.
+        a, b, c = faces[0]
+        m = len(box.vertices)
+        vertices = np.vstack([box.vertices, (box.vertices[a] + box.vertices[b]) / 2])
+        faces[0] = [a, m, c]
+        faces += [[m, b, c], [a, b, m]]
+        mesh = trimesh.Trimesh(vertices, faces, process=False)
+        self.assertTrue(mesh.is_watertight and mesh.is_winding_consistent)
+        self.assertTrue((mesh.area_faces <= 1e-12).any())
+        self.assertEqual(solid_problems(mesh, 'fixed', check_self_intersections=False), [])
+        report = assess_release(box_between([5, -1, -1], [7, 1, 1]), mesh, [1, 0, 0], .1, check_self_intersections=False)
+        self.assertEqual(report['outcome'], 'strict_pass')
+        self.assertTrue(any('degenerate' in w for w in report['input_warnings']))
 
     def test_invalid_arguments_raise(self):
         f = fixture('clean-withdrawal')

@@ -61,6 +61,40 @@ def is_solid(mesh):
     return bool(len(mesh.faces) and mesh.is_watertight and mesh.is_winding_consistent and solid_volume(mesh)>0)
 
 
+def to_manifold(mesh):
+    import manifold3d
+    return manifold3d.Manifold(manifold3d.Mesh(vert_properties=np.asarray(mesh.vertices,np.float32),
+                                               tri_verts=np.asarray(mesh.faces,np.uint32)))
+
+
+def from_manifold(solid):
+    result=solid.to_mesh()
+    return trimesh.Trimesh(np.asarray(result.vert_properties)[:,:3],np.asarray(result.tri_verts),process=False)
+
+
+def sweep(mesh, direction, length, thickness=1e-4):
+    """Solid swept by `mesh` translating `length` mm along unit `direction`.
+
+    Minkowski sum with a segment, built as a `thickness` x `thickness` prism (Manifold needs a
+    solid), so the result is a superset of the exact sweep by at most thickness/sqrt(2) mm.
+    """
+    direction=np.asarray(direction,float)/np.linalg.norm(direction)
+    segment=box_between([-thickness/2,-thickness/2,0],[thickness/2,thickness/2,length])
+    segment.apply_transform(trimesh.geometry.align_vectors([0,0,1],direction))
+    return from_manifold(to_manifold(mesh).minkowski_sum(to_manifold(segment)))
+
+
+def erode(mesh, radius):
+    """Points whose distance below the surface is at least about `radius` (Minkowski difference).
+
+    Eroding by an icosahedral polytope inscribed in the radius ball gives a superset of the
+    exact ball erosion, so "nothing meets the eroded solid" still proves "nothing is `radius`
+    deep". Returns an empty mesh when the solid is thinner than that everywhere.
+    """
+    ball=trimesh.creation.icosphere(subdivisions=1,radius=radius)
+    return from_manifold(to_manifold(mesh).minkowski_difference(to_manifold(ball)))
+
+
 def boolean(op, meshes):
     return getattr(trimesh.boolean,op)(meshes,engine='manifold')
 

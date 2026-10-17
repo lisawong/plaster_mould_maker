@@ -47,6 +47,23 @@ def clean_withdrawal():
         'strict_pass', 0., 'Square pin withdrawn from its exact-fit hole: sliding contact only.')
 
 
+def long_sliding_withdrawal():
+    fixed = boolean('difference', [box_between([-5, -5, -60], [5, 5, 0]), box_between([-1, -1, -60], [1, 1, 0])])
+    return KnownAnswer(
+        'long-sliding-withdrawal', 'Clean convex solid', box_between([-1, -1, -60], [1, 1, 0]), fixed, (0, 0, 1), .1,
+        'strict_pass', 0., '60 mm pin slides out of an exact-fit through-hole at the 0.1 mm default allowance: '
+        'contact along the whole path, which sampling alone cannot certify cheaply.')
+
+
+def wide_sliver_and_deep_catch():
+    moving = trimesh.util.concatenate([box_between([4.95, -4, -4], [7, -1, 4]),
+                                       box_between([4.7, 2, 2], [7, 2.3, 2.3])])
+    return KnownAnswer(
+        'wide-sliver-and-deep-catch', 'Deep local catch', moving, _fixed_block(), (1, 0, 0), .2, 'fail', .3,
+        'One pose with a 0.05 mm-deep, 1.2 mm3 sliver and a 0.3 mm-deep, 0.027 mm3 catch: the catch location '
+        'must be the deep one, not the larger volume.')
+
+
 def thin_wide_overlap():
     return KnownAnswer(
         'thin-wide-overlap', 'Thin, wide overlap', box_between([4.95, -4, -4], [6.95, 4, 4]), _fixed_block(),
@@ -113,8 +130,9 @@ def self_intersecting_input():
 
 
 _BUILDERS = {f.__name__.replace('_', '-'): f for f in (
-    clean_withdrawal, thin_wide_overlap, deep_catch, bound_wider_than_depth, zero_thickness_contact,
-    near_coplanar_sliver, shallow_sliver, between_sample_catch, thin_fixed_wall, self_intersecting_input)}
+    clean_withdrawal, long_sliding_withdrawal, thin_wide_overlap, wide_sliver_and_deep_catch, deep_catch,
+    bound_wider_than_depth, zero_thickness_contact, near_coplanar_sliver, shallow_sliver, between_sample_catch,
+    thin_fixed_wall, self_intersecting_input)}
 FIXTURES = tuple(_BUILDERS)
 
 

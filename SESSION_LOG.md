@@ -217,3 +217,19 @@ No implementation or test execution occurred this session. No changes committed 
 - [ ] **User:** choose second STL (blocks Stage 10).
 - [ ] Retire prototype `workflow.ReviewWorkflow` once commands route through `job.Job` (R10.2).
 - [ ] Stages 3–11 per PLAN.md.
+
+### Code review fixes — 2026-10-17 (PR #4)
+
+- A full-effort code review of PR #4 found that the 1-Lipschitz bound needed samples closer than twice the allowance wherever depth is zero. A clean 60 mm sliding withdrawal at the 0.1 mm default came back `inconclusive` after 200 samples (reproduced).
+- Tests first: fixtures `long-sliding-withdrawal` and `wide-sliver-and-deep-catch`; tests for location, per-side record consistency, degenerate-face inputs and erosion certificates.
+- Fixes:
+  - Swept intervals: `pipeline.sweep`, a Minkowski sum with a 1e-4 mm segment prism, gives the exact union of overlaps between samples.
+  - Erosion certificates: `pipeline.erode`, a Minkowski difference by an inscribed ball, certifies at 0.999 × allowance and at the contact tolerance. Default seeds are now just 0 and the clearance.
+  - Zero-area faces are `input_warnings` rather than `unsupported`.
+  - `worst_location` reports the deepest component.
+  - Per-side bounds only tighten.
+  - Measured-depth candidates are tried in batches.
+  - The contact-fragment rank test is shared (`release_depth.is_contact_fragment`), and sliver faces are dropped by a relative determinant test.
+- The pin withdrawals now pass `strict_pass` in 0.4 s with 2 samples. Result: **143 passed**.
+- Teapot full assessment (exploratory): half A conditional_finishing in 187 s (measured 0.066 mm, certified < 0.4995 mm), half B conditional_finishing in 174 s (measured 0.097 mm, certified < 0.4995 mm) at the demo's 0.5 mm allowance, 2 samples each (0 and clearance).
+- Not addressed (out of scope): older modules (`simplify.py`, `print_layout.py`, `contour_seam.py`, `review.py`) still call trimesh `volume`/`is_volume` and can emit the same warnings.

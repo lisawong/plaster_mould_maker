@@ -30,12 +30,16 @@ def _boundary_bound(triangles,reference,tolerance,max_levels=12):
         if len(pending)>250000:break
     return measured,max(settled,last_upper)
 
+def is_contact_fragment(component,tolerance=1e-10):
+    """Vertices span less than 3D (rank tolerance in mm): a contact patch, not volume."""
+    return np.linalg.matrix_rank(component.vertices-component.vertices.mean(axis=0),tol=tolerance)<3
+
 def collision_depth_bound(collision,reference,spatial_tolerance_mm=.02,max_levels=12):
     if not np.isfinite(spatial_tolerance_mm) or spatial_tolerance_mm<=0:raise ValueError('Positive finite spatial tolerance required')
     if not len(collision.faces):return {'measured_depth_mm':0.,'upper_bound_mm':0.,'components':[]}
     components=[];contact_fragments=0
     for component in collision.split(only_watertight=False):
-        if np.linalg.matrix_rank(component.vertices-component.vertices.mean(axis=0),tol=1e-10)<3:
+        if is_contact_fragment(component):
             contact_fragments+=1
             continue
         enclosure='original_component'
@@ -44,7 +48,7 @@ def collision_depth_bound(collision,reference,spatial_tolerance_mm=.02,max_level
                 component=component.convex_hull
                 enclosure='convex_enclosure_of_fragment'
             except Exception as error:
-                if np.linalg.matrix_rank(component.vertices-component.vertices.mean(axis=0),tol=1e-10)>=3:
+                if not is_contact_fragment(component):
                     raise ValueError('Cannot construct a conservative collision enclosure') from error
                 measured,boundary=_boundary_bound(component.triangles,reference,spatial_tolerance_mm,max_levels)
                 components.append({'measured_boundary_depth_mm':measured,'boundary_upper_bound_mm':boundary,'interior_cover_radius_mm':0.,'upper_bound_mm':boundary,'bounds_mm':component.bounds.tolist(),'enclosure':'lower_dimensional_contact'})
