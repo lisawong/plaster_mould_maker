@@ -290,7 +290,7 @@ No implementation or test execution occurred this session. No changes committed 
 - Reviewed `main...HEAD` on `claude/stage-2-5-view` through `f138aa7`.
 - Reproduced three P2 findings: malformed release records escape JSON error handling; open section paths are reported as empty; palette collisions change label colours between rounds.
 - Validation: 166 tests and 72 subtests passed; one existing trimesh warning. No implementation fixes made.
-- Created [REVIEW-HANDOFF.md](REVIEW-HANDOFF.md) with reproductions, test-first fix guidance, and completion criteria.
+- Created `review-notes/REVIEW-HANDOFF.md` (local only; moved 2026-10-18) with reproductions, test-first fix guidance, and completion criteria.
 - Open todo: resolve all three handoff findings before merging Stage 2.5.
 
 ## 2026-10-17 — Stage 2.5 review fixes (local session, branch `claude/stage-2-5-view`)
@@ -310,3 +310,10 @@ No implementation or test execution occurred this session. No changes committed 
 - Result: **183 passed**, 72 subtests (one existing trimesh warning).
 - Not committed (not mine): `.agents/` and `.codex/` (Codex copies of the skill and agent).
 - Follow-up: the user will use Codex as a review agent, so I committed `.agents/skills/look/SKILL.md` and `.codex/agents/mould-inspector.toml`. The Codex agent predated the review fixes (stale loop-count and colour rules), so I regenerated it from the Claude agent. New test `test_codex_copies_match_claude_skill_and_agent` failed first, then passed. **184 passed.**
+
+## 2026-10-18 — Review-notes folder for dev ↔ review agent handoffs
+
+- Agent: Claude Code (VS Code extension), Opus 5.5.
+- Workflow change: a separate review agent now works alongside the dev agent. They communicate via files in `review-notes/`.
+- Moved `REVIEW-HANDOFF.md` → `review-notes/REVIEW-HANDOFF.md`, untracked it, and git-ignored `/review-notes/` so handoff notes stay local.
+- Updated references in PLAN.md, SCRATCHPAD.md, SESSION_LOG.md and `tests/test_view.py`; recorded the decision in SCRATCHPAD.md.

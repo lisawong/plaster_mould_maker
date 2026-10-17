@@ -78,9 +78,11 @@
 
 ## Decisions
 
+- 2026-10-18: The workflow now has a separate **review agent** alongside the **dev agent**. They communicate through files in `review-notes/` (git-ignored, local only): the review agent writes findings/handoffs there, the dev agent works from them and records resolutions back in the same file. First file: `review-notes/REVIEW-HANDOFF.md` (Stage 2.5 review, moved from the repo root).
+
 - 2026-10-17: Codex is used as a review agent for now. The Codex copies of `/look` and `mould-inspector` (`.agents/`, `.codex/`) are committed. The Claude files are the source of truth, and a test keeps the copies identical.
 
-- 2026-10-17: Stage 2.5 review fixes (REVIEW-HANDOFF.md).
+- 2026-10-17: Stage 2.5 review fixes (review-notes/REVIEW-HANDOFF.md, local only).
   - Malformed `--marks-from` records now give JSON errors.
   - Open section paths are kept: `open_paths`, drawn dashed and unfilled, with per-plane `empty`.
   - Colours are now a pure function of the label (fixed for object/half_1/half_2, otherwise hashed hue clear of mark red). Stability between renders wins over guaranteed distinctness within one render.
