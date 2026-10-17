@@ -277,7 +277,7 @@ No implementation or test execution occurred this session. No changes committed 
 
 ### Open todos
 
-- [ ] **User:** review the Stage 2.5 branch; push/PR when happy.
+- [ ] **User:** review and merge PR #5 (https://github.com/lisawong/plaster_mould_maker/pull/5) once CI is green.
 - [x] Try `mould-inspector` on the teapot halves (done in this session).
 - [ ] **User:** print `prints/groove-coupon/` and report best slot + fill-line legibility (A026).
 - [ ] **User:** choose second STL (blocks Stage 10).
