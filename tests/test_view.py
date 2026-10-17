@@ -341,3 +341,18 @@ def test_hashed_colours_differ_and_stay_clear_of_mark_red():
         r, g, b = (int(colour[i:i + 2], 16) / 255 for i in (1, 3, 5))
         hue = colorsys.rgb_to_hls(r, g, b)[0] * 360
         assert 30 <= hue <= 330, (colour, hue)
+
+
+# --- Codex copies of the skill and agent stay identical to the Claude ones ----------------
+
+def test_codex_copies_match_claude_skill_and_agent():
+    import tomllib
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1]
+    assert (root / '.agents/skills/look/SKILL.md').read_text() == (root / '.claude/skills/look/SKILL.md').read_text()
+    claude = (root / '.claude/agents/mould-inspector.md').read_text()
+    front, body = claude.split('\n---\n', 1)
+    codex = tomllib.loads((root / '.codex/agents/mould-inspector.toml').read_text())
+    assert codex['name'] == 'mould-inspector'
+    assert codex['description'] in front
+    assert codex['developer_instructions'].strip() == body.strip()

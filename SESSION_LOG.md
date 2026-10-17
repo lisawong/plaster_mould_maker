@@ -309,3 +309,4 @@ No implementation or test execution occurred this session. No changes committed 
 - Docs: TECHNICAL-REFERENCE section contract and colours, mould-inspector rules, PLAN status, SCRATCHPAD decision.
 - Result: **183 passed**, 72 subtests (one existing trimesh warning).
 - Not committed (not mine): `.agents/` and `.codex/` (Codex copies of the skill and agent).
+- Follow-up: the user will use Codex as a review agent, so I committed `.agents/skills/look/SKILL.md` and `.codex/agents/mould-inspector.toml`. The Codex agent predated the review fixes (stale loop-count and colour rules), so I regenerated it from the Claude agent. New test `test_codex_copies_match_claude_skill_and_agent` failed first, then passed. **184 passed.**

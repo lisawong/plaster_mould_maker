@@ -78,6 +78,8 @@
 
 ## Decisions
 
+- 2026-10-17: Codex is used as a review agent for now. The Codex copies of `/look` and `mould-inspector` (`.agents/`, `.codex/`) are committed. The Claude files are the source of truth, and a test keeps the copies identical.
+
 - 2026-10-17: Stage 2.5 review fixes (REVIEW-HANDOFF.md).
   - Malformed `--marks-from` records now give JSON errors.
   - Open section paths are kept: `open_paths`, drawn dashed and unfilled, with per-plane `empty`.

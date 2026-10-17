@@ -49,6 +49,7 @@ Pictures are inspection aids. Outcomes always come from the release checks.
   Stage 2.5 added:
   - `view.py` — `mouldflow view`: PNG contact sheet, cross-sections and self-contained three.js viewer, with release-catch marks.
 - `.claude/skills/look/`, `.claude/agents/mould-inspector.md`, `.claude/launch.json` — visual-inspection skill, iterating inspector agent and the `look` preview server.
+- `.agents/skills/look/`, `.codex/agents/mould-inspector.toml` — the same skill and agent for Codex (used as a review agent). Edit the Claude versions and copy them across; `tests/test_view.py` fails if the copies differ.
 - `tests/` — pytest suite: 45 ported baseline tests, coupon tests, Stage 1 job/schema tests, Stage 2 known-answer release tests and Stage 2.5 view tests.
   - `tests/fixtures/teapot-v7/` — accepted V7 source, prepared object and plaster halves for the Stage 5 regression; see its `PROVENANCE.md`.
   - `tests/fixtures/historical/` — older three-part study used only by `test_scene_artifact` (historical, not V7 evidence).
