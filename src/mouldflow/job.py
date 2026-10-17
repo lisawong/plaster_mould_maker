@@ -242,6 +242,8 @@ class Job:
 
     def next_action(self):
         self._verify()
+        if not self._state['gates'].get('input') and self.settings.source.file is None:
+            return 'intake'
         for gate in GATES:
             record = self._state['gates'].get(gate)
             if not record:

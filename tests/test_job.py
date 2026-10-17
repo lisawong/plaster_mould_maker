@@ -51,7 +51,7 @@ def test_init_refuses_non_empty_folder_and_open_refuses_non_job(tmp_path):
 def test_all_gates_start_not_submitted(job):
     assert GATES == ('input', 'plaster', 'forms', 'export')
     assert all(job.gate_status(g) is GateStatus.NOT_SUBMITTED for g in GATES)
-    assert job.next_action() == 'generate_input'
+    assert job.next_action() == 'intake'  # Stage 3: no source declared yet
 
 
 def test_artifacts_must_live_inside_the_job(job, tmp_path):

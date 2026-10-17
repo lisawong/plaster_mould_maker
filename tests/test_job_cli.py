@@ -17,7 +17,7 @@ def test_init_then_status(tmp_path):
     code, out = run('job', 'init', tmp_path / 'job', '--finishing-allowance-mm', '0.2')
     assert code == 0, out
     assert out['schema_version'] == 'mouldflow.result/1'
-    assert out['status'] == 'ok' and out['next_action'] == 'generate_input'
+    assert out['status'] == 'ok' and out['next_action'] == 'intake'
     code, out = run('job', 'status', tmp_path / 'job')
     assert code == 0
     assert out['details']['settings']['plaster']['finishing_allowance_mm'] == 0.2

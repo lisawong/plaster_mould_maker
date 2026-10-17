@@ -78,6 +78,13 @@
 
 ## Decisions
 
+- 2026-10-18: Stage 3 (intake & prepare) design, agreed with the user:
+  - **Scale:** `--units mm|cm|m|in` is always required at intake (never guessed). `--target-mm`/`--target-axis` optionally rescale so the prepared extent on that axis matches. Every factor is recorded.
+  - **Orientation:** `mouldflow prepare --rotate AXIS=DEG` (repeatable, applied in order about fixed axes) is stored in `settings.source`, so changing it invalidates the input gate. The canonical frame is Z-up. Order: units → repairs → rotations → target scale → centre at origin.
+  - **Repairs:** only when requested (`--repair drop-degenerate|fix-winding|stitch=TOL`). Invalid meshes are rejected with reasons and suggested repairs, and nothing is auto-fixed. A requested repair that matches no reported problem is an error. Multiple components, self-intersections, zero volume and non-finite vertices cannot be repaired (`unsupported`).
+  - **Degenerate faces:** zero-area faces reject a *source* STL (PRD R2.1). Generated Boolean meshes keep the Stage 2 warning behaviour.
+  - Each successful prepare writes a new revision folder `candidates/input/rNNN/` (never overwritten) and submits the input gate, which invalidates anything downstream. A rejected prepare writes nothing. One job has one source STL; a different file needs a new job.
+
 - 2026-10-18: The workflow now has a separate **review agent** alongside the **dev agent**. They communicate through files in `review-notes/` (git-ignored, local only): the review agent writes findings/handoffs there, the dev agent works from them and records resolutions back in the same file. First file: `review-notes/REVIEW-HANDOFF.md` (Stage 2.5 review, moved from the repo root).
 
 - 2026-10-17: Codex is used as a review agent for now. The Codex copies of `/look` and `mould-inspector` (`.agents/`, `.codex/`) are committed. The Claude files are the source of truth, and a test keeps the copies identical.

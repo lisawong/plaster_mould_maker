@@ -317,3 +317,22 @@ No implementation or test execution occurred this session. No changes committed 
 - Workflow change: a separate review agent now works alongside the dev agent. They communicate via files in `review-notes/`.
 - Moved `REVIEW-HANDOFF.md` → `review-notes/REVIEW-HANDOFF.md`, untracked it, and git-ignored `/review-notes/` so handoff notes stay local.
 - Updated references in PLAN.md, SCRATCHPAD.md, SESSION_LOG.md and `tests/test_view.py`; recorded the decision in SCRATCHPAD.md.
+
+## 2026-10-18 — Stage 3: intake & prepare (branch `claude/stage-3-intake`, not pushed)
+
+- Agent: Claude Code (VS Code extension), Opus 5.5.
+- Agreed the design with the user (SCRATCHPAD decision 2026-10-18): units required and target optional; `--rotate AXIS=DEG`; explicit opt-in repairs only; zero-area faces reject a source STL.
+- Tests first: `tests/test_intake.py` (33) and `tests/test_intake_cli.py` (5). They failed on the missing module. Two Stage 1 assertions changed: a fresh job's `next_action` is now `intake`. Test fixes during the work: tolerances loosened to float32 (binary STL), and the self-intersecting fixture is `KnownAnswer.fixed`, not `.moving`.
+- Built `src/mouldflow/intake.py`, the `mouldflow intake|prepare` CLI and `settings.source` fields `file`, `sha256`, `rotations`. A rejection lists every problem: the self-intersection scan runs on any closed, consistently wound mesh, even one with several pieces.
+- Looked (`look/stage3-teapot/`): teapot V7 `accepted-input.stl` → r001 matches the prototype's `prepared_object.stl` exactly (80.489 × 50 × 37.609 mm, same volume). It is one filled solid with the handle hole open. r002 (`--rotate x=90`) lies on its side, and r001 is untouched. Gotcha: the target axis is measured after rotation (r002 scaled 1.33× to keep Y = 50 mm); this is documented.
+- Result: **222 passed**, 72 subtests (one existing trimesh warning).
+- Docs: README, PLAN (Stage 2.5 marked done; Stage 3 status), TECHNICAL-REFERENCE (Intake and prepare), SCRATCHPAD.
+
+### Open todos
+
+- [ ] Review agent: review `main...claude/stage-3-intake` (handoff via `review-notes/`).
+- [ ] Push and open the Stage 3 PR once review is done (user: push after Stage 3 is complete).
+- [ ] **User:** print `prints/groove-coupon/` and report best slot + fill-line legibility (A026).
+- [ ] **User:** choose second STL (blocks Stage 10).
+- [ ] Retire prototype `workflow.ReviewWorkflow` / `review.py prepare` once commands route through `job.Job` (R10.2).
+- [ ] Stages 4–11 per PLAN.md.

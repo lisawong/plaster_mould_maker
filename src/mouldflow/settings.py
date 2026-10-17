@@ -13,10 +13,17 @@ class _Section(BaseModel):
 
 
 class SourceSettings(_Section):
-    """Intake declarations. STL has no units, so `units` stays unset until the human declares it."""
+    """Intake declarations. STL has no units, so `units` stays unset until the human declares it.
+
+    `file` and `sha256` identify the copied source STL; `rotations` are (axis, degrees) applied in
+    order by `mouldflow prepare`. The input gate is bound to this whole section.
+    """
+    file: str | None = None
+    sha256: str | None = None
     units: Literal['mm', 'cm', 'm', 'in'] | None = None
     target_mm: PositiveFloat | None = None
     target_axis: Literal['X', 'Y', 'Z'] = 'Y'
+    rotations: tuple[tuple[Literal['X', 'Y', 'Z'], float], ...] = ()
     purpose: str | None = None
 
 
