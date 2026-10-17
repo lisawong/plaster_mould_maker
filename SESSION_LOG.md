@@ -233,3 +233,80 @@ No implementation or test execution occurred this session. No changes committed 
 - The pin withdrawals now pass `strict_pass` in 0.4 s with 2 samples. Result: **143 passed**.
 - Teapot full assessment (exploratory): half A conditional_finishing in 187 s (measured 0.066 mm, certified < 0.4995 mm), half B conditional_finishing in 174 s (measured 0.097 mm, certified < 0.4995 mm) at the demo's 0.5 mm allowance, 2 samples each (0 and clearance).
 - Not addressed (out of scope): older modules (`simplify.py`, `print_layout.py`, `contour_seam.py`, `review.py`) still call trimesh `volume`/`is_volume` and can emit the same warnings.
+
+## 2026-10-17 — Project review and Stage 2.5 (local session, branch `claude/stage-2-5-view`)
+
+- Agent: Claude Code (desktop app), Opus 5.5.
+- Session state: PR #4 merged; clean `main`; 143 tests green locally, CI green on main.
+
+### Review of the post-Stage-2 state
+
+- Healthy: 143 tests, CI green; release checks now cover the whole motion (swept intervals, erosion certificates), and all five outcomes are tested.
+- Docs were stale: PLAN said Stage 2 "PR #4 open" and README said "in review". Both fixed here.
+- Carried risks: teapot assessment takes about 3 min per half (A033, matters for Stage 5); prototype `workflow.ReviewWorkflow` is still unretired; one baseline trimesh warning remains; older modules still use trimesh `volume`.
+- User asked for a way to inspect geometry visually as we go (A034) → Stage 2.5.
+
+### Work done
+
+- Tests first: `tests/test_view.py` (16 tests) failed at import before `view.py` existed. A doc-vs-CLI drift test (2 cases) was added after the skill and agent files.
+- `view.py` + `mouldflow view`: `views.png`, `sections.png`, `viewer.html`, result record; `--up`, `--explode`, `--section`, `--mark`, `--marks-from`, `--no-html`, `--max-preview-faces`.
+- `.claude/skills/look/SKILL.md` (`/look`), `.claude/agents/mould-inspector.md`, `.claude/launch.json` (`look` server), `look/` git-ignored.
+- Tried on the teapot V7 fixtures. Render takes about 10 s. Sections show the cavity, keys and handle hole clearly. The viewer was checked in the browser pane: part toggles, section plane and zoom-to-mark all work.
+- Bugs found by looking: meshes marked always-transparent hid the red mark box, so transparency now turns on only when opacity < 1; the control panel covered the zoom target, so it is now collapsible (collapsed on narrow screens).
+- Result: **161 passed** locally.
+
+### First mould-inspector run (same day)
+
+- Ran `mould-inspector` on the teapot V7 halves. Question: are the halves closed, keyed and fragment-free? It took 5 rounds in about 2.5 min.
+- Its answer was correct, and I checked `round-2/sections.png` myself: 12 mm enclosure, intended gate, keys as domes on half_2 into pockets in half_1, no fragments seen.
+- Its feedback, applied test-first (5 new tests):
+  - `--explode` no longer moves sections, bounds or marks;
+  - `pieces` count per mesh;
+  - colours follow labels;
+  - `--views` (8 named views, directions in `--help`);
+  - FINDINGS.md is saved by the caller, because the harness blocks subagents from writing report files.
+- Tip added to the agent and skill: to see a parting face, render that half alone facing it.
+- `look/teapot-inspection/FINDINGS.md` saved locally (`look/` is git-ignored).
+- Result: **166 passed** locally.
+
+### Notes for later stages
+
+- Stage 4: pass `assess_release` output (as JSON) to `--marks-from` and add a `--section` through the catch.
+- The teapot is Z-up; its split plane Y=0 is vertical, so use `--explode y=…`.
+- Exploded PNG views still hide inward-facing cavities. Use sections, the viewer's section plane, or render one half alone.
+
+### Open todos
+
+- [ ] **User:** review and merge PR #5 (https://github.com/lisawong/plaster_mould_maker/pull/5) once CI is green.
+- [x] Try `mould-inspector` on the teapot halves (done in this session).
+- [ ] **User:** print `prints/groove-coupon/` and report best slot + fill-line legibility (A026).
+- [ ] **User:** choose second STL (blocks Stage 10).
+- [ ] Retire prototype `workflow.ReviewWorkflow` once commands route through `job.Job` (R10.2).
+- [ ] Stages 3–11 per PLAN.md.
+
+## 2026-10-17 23:39 NZDT — Branch review and fix handoff
+
+- Agent: Codex, with standards/spec review subagents.
+- Reviewed `main...HEAD` on `claude/stage-2-5-view` through `f138aa7`.
+- Reproduced three P2 findings: malformed release records escape JSON error handling; open section paths are reported as empty; palette collisions change label colours between rounds.
+- Validation: 166 tests and 72 subtests passed; one existing trimesh warning. No implementation fixes made.
+- Created [REVIEW-HANDOFF.md](REVIEW-HANDOFF.md) with reproductions, test-first fix guidance, and completion criteria.
+- Open todo: resolve all three handoff findings before merging Stage 2.5.
+
+## 2026-10-17 — Stage 2.5 review fixes (local session, branch `claude/stage-2-5-view`)
+
+- Agent: Claude Code (desktop app), Opus 5.5. Input: Codex review in REVIEW-HANDOFF.md (three P2 findings).
+- Tests first: 17 new regression tests in `tests/test_view.py`. All 14 new failing cases failed for the reported reasons: empty stdout or unhelpful errors, `open_paths` missing, colour collisions. The colour test that required 8 unique palette slots was replaced by a pure-function test.
+- Fixes in `src/mouldflow/view.py`:
+  1. `marks_from_record` validates the record (top level, details, location, bounds: finite, ordered, 2 × 3) and raises `ViewError` naming the file, which surfaces as a JSON error with exit 2.
+  2. `_cut` keeps `section.dangling` open paths. Summaries gain `open_paths` and per-plane `empty`. Open paths are drawn dashed and never filled. The empty-plane label now reads "nothing intersects this plane".
+  3. `label_colour`: fixed colours for object/half_1/half_2, otherwise a crc32 hue (30–330°) with adler32 lightness. Independent of order and of which other labels are present.
+- Looked with `/look` (`look/review-sections/`):
+  - open box: dashed U, unfilled, no closing edge;
+  - closed box: filled;
+  - annulus: hole open;
+  - Z=20: empty.
+- Docs: TECHNICAL-REFERENCE section contract and colours, mould-inspector rules, PLAN status, SCRATCHPAD decision.
+- Result: **183 passed**, 72 subtests (one existing trimesh warning).
+- Not committed (not mine): `.agents/` and `.codex/` (Codex copies of the skill and agent).
+- Follow-up: the user will use Codex as a review agent, so I committed `.agents/skills/look/SKILL.md` and `.codex/agents/mould-inspector.toml`. The Codex agent predated the review fixes (stale loop-count and colour rules), so I regenerated it from the Claude agent. New test `test_codex_copies_match_claude_skill_and_agent` failed first, then passed. **184 passed.**
