@@ -34,9 +34,9 @@ The PR template (`.github/pull_request_template.md`) carries this checklist.
 - **Tests (first):** each fixture asserts metric unit (mm vs mm³), bound-vs-measured and outcome.
 
 ## Stage 2.5 — Visual inspection toolkit (added 2026-10-17)
-- **Status:** in progress on branch `claude/stage-2-5-view` (161 tests green locally).
+- **Status:** in progress on branch `claude/stage-2-5-view` (166 tests green locally). First `mould-inspector` run done; its feedback is applied.
 - **Why:** look at the geometry as each later stage is built, not only at metrics (SCRATCHPAD A034). It brings forward part of Stage 3's PNG previews and Stage 9's review assets without replacing Stage 9.
-- **Build:** `mouldflow view MESH[=LABEL]... --out DIR` writes `views.png` (four angles), `sections.png` (filled cross-sections, holes open) and a self-contained `viewer.html` (three.js, parts toggle/opacity, section plane, zoom-to-mark), and prints a `mouldflow.result/1` record. Options: `--up`, `--explode`, `--section`, `--mark`, `--marks-from` (a release record's `worst_location`). Project skill `/look`, agent `mould-inspector` (render → look → adjust loop, writes `look/<name>/FINDINGS.md`), `look` server in `.claude/launch.json`.
+- **Build:** `mouldflow view MESH[=LABEL]... --out DIR` writes `views.png` (four angles), `sections.png` (filled cross-sections, holes open) and a self-contained `viewer.html` (three.js, parts toggle/opacity, section plane, zoom-to-mark), and prints a `mouldflow.result/1` record. Options: `--up`, `--views`, `--explode` (3D pictures only; sections stay assembled), `--section`, `--mark`, `--marks-from` (a release record's `worst_location`). Project skill `/look`, agent `mould-inspector` (render → look → adjust loop, writes `look/<name>/FINDINGS.md`), `look` server in `.claude/launch.json`.
 - **Tests (first):** marks from both record shapes; explode direction; section loop counts (ring = 2, miss = 0); red mark pixels appear; HTML embeds every mesh at full face count, escapes labels, pins three.js; CLI record and JSON errors; skill/agent docs use only real flags.
 
 ## Stage 3 — Intake & prepare

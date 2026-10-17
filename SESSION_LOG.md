@@ -255,17 +255,30 @@ No implementation or test execution occurred this session. No changes committed 
 - Bugs found by looking: meshes marked always-transparent hid the red mark box, so transparency now turns on only when opacity < 1; the control panel covered the zoom target, so it is now collapsible (collapsed on narrow screens).
 - Result: **161 passed** locally.
 
+### First mould-inspector run (same day)
+
+- Ran `mould-inspector` on the teapot V7 halves. Question: are the halves closed, keyed and fragment-free? It took 5 rounds in about 2.5 min.
+- Its answer was correct, and I checked `round-2/sections.png` myself: 12 mm enclosure, intended gate, keys as domes on half_2 into pockets in half_1, no fragments seen.
+- Its feedback, applied test-first (5 new tests):
+  - `--explode` no longer moves sections, bounds or marks;
+  - `pieces` count per mesh;
+  - colours follow labels;
+  - `--views` (8 named views, directions in `--help`);
+  - FINDINGS.md is saved by the caller, because the harness blocks subagents from writing report files.
+- Tip added to the agent and skill: to see a parting face, render that half alone facing it.
+- `look/teapot-inspection/FINDINGS.md` saved locally (`look/` is git-ignored).
+- Result: **166 passed** locally.
+
 ### Notes for later stages
 
 - Stage 4: pass `assess_release` output (as JSON) to `--marks-from` and add a `--section` through the catch.
 - The teapot is Z-up; its split plane Y=0 is vertical, so use `--explode y=…`.
 - Exploded PNG views still hide inward-facing cavities. Use sections, the viewer's section plane, or render one half alone.
-- `mould-inspector` was written but not yet run end-to-end (agent definitions load at session start).
 
 ### Open todos
 
 - [ ] **User:** review the Stage 2.5 branch; push/PR when happy.
-- [ ] Try `mould-inspector` in a fresh session on the teapot halves.
+- [x] Try `mould-inspector` on the teapot halves (done in this session).
 - [ ] **User:** print `prints/groove-coupon/` and report best slot + fill-line legibility (A026).
 - [ ] **User:** choose second STL (blocks Stage 10).
 - [ ] Retire prototype `workflow.ReviewWorkflow` once commands route through `job.Job` (R10.2).

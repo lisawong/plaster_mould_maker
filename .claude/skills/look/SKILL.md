@@ -20,4 +20,6 @@ If that is empty, look at whatever geometry this session last produced or change
 4. Tell the user, briefly: what each part is, anything surprising (gaps, slivers, open cavities, keys missing, catch location), and what the pictures can't settle. Pictures never change a release outcome. Numbers come from the checks.
 5. Offer the rotatable view. Start the `look` server (preview_start name `look`, serves `look/` on port 8765) and open `http://localhost:8765/<name>/viewer.html` in the browser pane. It can toggle parts, change opacity, slide a section plane and zoom to marks.
 
-For several angles, sections or rounds of looking (e.g. hunting a catch), hand off to the `mould-inspector` agent instead of iterating here.
+For several angles, sections or rounds of looking (e.g. hunting a catch), hand off to the `mould-inspector` agent instead of iterating here. Give it the question, labelled mesh paths, the up axis and the split/withdrawal axis. It returns its findings as text, which you then save to `look/<name>/FINDINGS.md`. Check at least one of its images yourself before passing its answer on.
+
+Handy: `--views NAME,...` picks angles (`uv run mouldflow view --help` says what each looks along). To see a parting face, render that half alone facing it. `--explode` only moves parts in the 3D pictures, and sections stay in the assembled pose. `details.meshes[].pieces` > 1 means separate bodies (stray fragments?).

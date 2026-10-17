@@ -19,7 +19,7 @@ from pydantic import ValidationError
 from .job import GATES, Job, JobError
 from .result import ResultRecord
 from .settings import JobSettings
-from .view import MAX_PREVIEW_FACES, ViewError, inspect
+from .view import DEFAULT_VIEWS, MAX_PREVIEW_FACES, VIEWS, ViewError, inspect
 
 
 def _parser():
@@ -39,7 +39,12 @@ def _parser():
     decide.add_argument('--revision', required=True)
     decide.add_argument('--answer', help='approve or request_changes; omitting it never approves')
     decide.add_argument('--note', required=True, help="the human's decision in their words")
-    view = groups.add_parser('view', help='render PNG views, sections and an HTML viewer of meshes')
+    view = groups.add_parser('view', help='render PNG views, sections and an HTML viewer of meshes',
+                             formatter_class=argparse.RawDescriptionHelpFormatter,
+                             epilog='views (with --up z; other up axes rotate x -> y -> z):\n' +
+                                    '\n'.join(f'  {name:9} {how}' for name, (_, _, how) in VIEWS.items()) +
+                                    '\n\n--explode moves parts apart in views.png and viewer.html only; '
+                                    'sections, bounds and marks stay in the assembled pose.')
     view.add_argument('meshes', nargs='+', help='mesh files, optionally PATH=LABEL')
     view.add_argument('--out', type=Path, required=True, help='folder for views.png, sections.png, viewer.html')
     view.add_argument('--section', action='append', default=[], metavar='AXIS=MM',
@@ -50,6 +55,8 @@ def _parser():
     view.add_argument('--marks-from', action='append', default=[], type=Path, metavar='RECORD.json',
                       help='highlight worst_location from a release assessment or its result record')
     view.add_argument('--up', choices=('x', 'y', 'z'), default='z', help='axis drawn vertically (default z)')
+    view.add_argument('--views', default=','.join(DEFAULT_VIEWS), metavar='NAME,...',
+                      help=f'views for views.png (default {",".join(DEFAULT_VIEWS)}; see below)')
     view.add_argument('--title')
     view.add_argument('--no-html', action='store_true', help='skip viewer.html')
     view.add_argument('--max-preview-faces', type=int, default=MAX_PREVIEW_FACES,
@@ -73,7 +80,8 @@ def _ok(command, job):
 def _view(args):
     return inspect(args.meshes, args.out, sections=args.section, explode_spec=args.explode, marks=args.mark,
                    marks_from=args.marks_from, up=args.up, title=args.title, html_viewer=not args.no_html,
-                   max_preview_faces=args.max_preview_faces)
+                   max_preview_faces=args.max_preview_faces,
+                   views=[v.strip() for v in args.views.split(',') if v.strip()])
 
 
 def run(argv):

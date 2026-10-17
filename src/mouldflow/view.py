@@ -9,6 +9,7 @@ import html
 import json
 import os
 import tempfile
+import zlib
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -20,11 +21,24 @@ from .result import ResultRecord
 
 AXES = {'x': 0, 'y': 1, 'z': 2}
 THREE_VERSION = '0.160.0'
-PALETTE = ('#c99762', '#5b8bd0', '#6aa874', '#9a7bc7', '#3fa7a3', '#8c8c8c', '#d4a93c', '#7f6a5a')
+# Colours follow labels (crc32 slot), so a part keeps its colour across renders; ordered so that
+# object → tan, half_1 → blue, half_2 → green.
+PALETTE = ('#d4a93c', '#5b8bd0', '#9a7bc7', '#6aa874', '#c99762', '#3fa7a3', '#8c8c8c', '#7f6a5a')
 MARK_COLOUR = '#ff2a2a'
 MAX_PREVIEW_FACES = 80000
-# (name, elevation, azimuth) in the up-aligned frame.
-VIEWS = (('iso', 25, -60), ('iso back', 25, 120), ('front', 0, -90), ('top', 90, -90))
+# name: (elevation, azimuth, what it shows) in the up-aligned frame. "depth" is the axis after `up`
+# in the cycle x → y → z → x minus one step: +y for up=z, +x for up=y, +z for up=x.
+VIEWS = {
+    'iso': (25, -60, 'from the front-right, above'),
+    'iso-back': (25, 120, 'from the back-left, above'),
+    'front': (0, -90, 'looks along +depth (+y when up=z)'),
+    'back': (0, 90, 'looks along -depth'),
+    'right': (0, 0, 'looks toward the left (along -x when up=z)'),
+    'left': (0, 180, 'looks toward the right (along +x when up=z)'),
+    'top': (90, -90, 'looks down the up axis'),
+    'bottom': (-90, -90, 'looks up the up axis'),
+}
+DEFAULT_VIEWS = ('iso', 'iso-back', 'front', 'top')
 MESH_SUFFIXES = ('.stl', '.obj', '.ply', '.off', '.glb', '.gltf')
 LIMITATIONS = [
     'Pictures are inspection aids only; release outcomes come from the release checks, not from these images.',
@@ -194,44 +208,63 @@ def _up_frame(up):
     return {'z': [0, 1, 2], 'y': [2, 0, 1], 'x': [1, 2, 0]}[up]
 
 
-def _colour(i):
-    return PALETTE[i % len(PALETTE)]
+def colours(labels):
+    """Label → colour from the label's crc32 slot; clashes within one render take the next free slot."""
+    taken, result = set(), {}
+    for label in labels:
+        slot = zlib.crc32(label.encode()) % len(PALETTE)
+        for step in range(len(PALETTE)):
+            if (slot + step) % len(PALETTE) not in taken:
+                slot = (slot + step) % len(PALETTE)
+                break
+        taken.add(slot)
+        result[label] = PALETTE[slot]
+    return result
 
 
 def _legend(fig, plt, items, marks, y=.04):
     from matplotlib.patches import Patch
-    handles = [Patch(color=_colour(i), label=item.label) for i, item in enumerate(items)]
+    palette = colours([i.label for i in items])
+    handles = [Patch(color=palette[item.label], label=item.label) for item in items]
     handles += [Patch(facecolor='none', edgecolor=MARK_COLOUR, linewidth=2, label=f'mark: {m.label}') for m in marks]
     fig.legend(handles=handles, loc='lower center', ncol=min(len(handles), 6), frameon=False,
                bbox_to_anchor=(.5, y - .03))
 
 
-def render_views(items, path, marks=(), up='z', title=None, max_faces=MAX_PREVIEW_FACES):
-    """Four-angle contact sheet. Returns the labels whose meshes were decimated for the picture."""
+def render_views(items, path, marks=(), up='z', title=None, max_faces=MAX_PREVIEW_FACES, views=DEFAULT_VIEWS):
+    """Contact sheet of named views. Returns the labels whose meshes were decimated for the picture."""
+    unknown = [v for v in views if v not in VIEWS]
+    if unknown or not views:
+        raise ViewError(f'unknown view(s) {unknown}; choose from {", ".join(VIEWS)}')
     matplotlib, plt = _pyplot(path)
+    palette = colours([i.label for i in items])
     from mpl_toolkits.mplot3d.art3d import Poly3DCollection
     order = _up_frame(up)
-    triangles, colours, decimated = [], [], []
-    for i, item in enumerate(items):
+    triangles, face_colours, decimated = [], [], []
+    for item in items:
         preview = preview_mesh(item.mesh, max_faces)
         if preview is not item.mesh:
             decimated.append(item.label)
         triangles.append(preview.triangles[:, :, order])
-        colours.append(np.tile(matplotlib.colors.to_rgba(_colour(i)), (len(preview.faces), 1)))
-    triangles, colours = np.concatenate(triangles), np.concatenate(colours)
+        face_colours.append(np.tile(matplotlib.colors.to_rgba(palette[item.label]), (len(preview.faces), 1)))
+    triangles, face_colours = np.concatenate(triangles), np.concatenate(face_colours)
     bounds = scene_bounds(items, marks)[:, order]
     centre, radius = bounds.mean(axis=0), max(float(np.ptp(bounds, axis=0).max()) * .55, 1e-3)
     extents = np.ptp(scene_bounds(items), axis=0)
 
-    fig = plt.figure(figsize=(14, 11), facecolor='#f4f1ec')
-    fig.text(.03, .965, title or 'mouldflow view', fontsize=18, weight='bold', color='#222')
-    fig.text(.03, .94, f'scene {extents[0]:.2f} × {extents[1]:.2f} × {extents[2]:.2f} mm (x × y × z)  ·  up = {up}',
+    columns = 1 if len(views) == 1 else 2
+    rows = -(-len(views) // columns)
+    height = 5.2 * rows + 0.6
+    fig = plt.figure(figsize=(7 * columns, height), facecolor='#f4f1ec')
+    fig.text(.03, 1 - .35 / height, title or 'mouldflow view', fontsize=18, weight='bold', color='#222')
+    fig.text(.03, 1 - .6 / height, f'scene {extents[0]:.2f} × {extents[1]:.2f} × {extents[2]:.2f} mm (x × y × z)  ·  up = {up}',
              fontsize=11, color='#444')
     light = matplotlib.colors.LightSource(azdeg=315, altdeg=45)
-    for n, (name, elev, azim) in enumerate(VIEWS):
-        ax = fig.add_subplot(2, 2, n + 1, projection='3d', facecolor='#f4f1ec')
+    for n, name in enumerate(views):
+        elev, azim, _ = VIEWS[name]
+        ax = fig.add_subplot(rows, columns, n + 1, projection='3d', facecolor='#f4f1ec')
         ax.computed_zorder = False
-        ax.add_collection3d(Poly3DCollection(triangles, facecolors=colours, edgecolors=colours, linewidths=.1,
+        ax.add_collection3d(Poly3DCollection(triangles, facecolors=face_colours, edgecolors=face_colours, linewidths=.1,
                                              shade=True, lightsource=light, zorder=1))
         for mark in marks:
             _box_edges(ax, np.asarray(mark.bounds, float)[:, order])
@@ -242,7 +275,7 @@ def render_views(items, path, marks=(), up='z', title=None, max_faces=MAX_PREVIE
         ax.set_axis_off()
         ax.set_title(name, fontsize=12, color='#333')
     _legend(fig, plt, items, marks)
-    fig.subplots_adjust(top=.90, bottom=.06, left=.01, right=.99, wspace=0, hspace=.05)
+    fig.subplots_adjust(top=1 - .9 / height, bottom=.6 / height, left=.01, right=.99, wspace=0, hspace=.05)
     fig.savefig(path, dpi=110, facecolor=fig.get_facecolor())
     plt.close(fig)
     return decimated
@@ -282,16 +315,18 @@ def render_sections(items, cuts, path, marks=(), title=None):
     fig = plt.figure(figsize=(5.2 * columns, 5.2 * rows + 1.2), facecolor='#f4f1ec')
     fig.text(.03, 1 - .45 / (5.2 * rows + 1.2), title or 'sections', fontsize=16, weight='bold', color='#222')
     summaries = []
+    palette = colours([i.label for i in items])
     for n, (axis, offset) in enumerate(cuts):
         ax = fig.add_subplot(rows, columns, n + 1, facecolor='white')
         found = section_loops(items, axis, offset)
         keep = [a for a in 'xyz' if a != axis]
-        for i, section in enumerate(found):
+        for section in found:
+            colour = palette[section['label']]
             for loop in section['_loops']:
-                ax.plot(loop[:, 0], loop[:, 1], color=_colour(i), linewidth=1.2)
+                ax.plot(loop[:, 0], loop[:, 1], color=colour, linewidth=1.2)
             shape = _oriented_path(section['_loops'])
             if shape is not None:
-                ax.add_patch(PathPatch(shape, facecolor=_colour(i), alpha=.45, edgecolor='none'))
+                ax.add_patch(PathPatch(shape, facecolor=colour, alpha=.45, edgecolor='none'))
         for mark in marks:
             b = np.asarray(mark.bounds, float)
             lo, hi = b[0, AXES[axis]], b[1, AXES[axis]]
@@ -320,8 +355,9 @@ def render_sections(items, cuts, path, marks=(), title=None):
 
 def write_html(items, path, marks=(), title='mouldflow view', up='z'):
     """Self-contained viewer: meshes embedded as base64 binary STL, three.js pinned from jsDelivr."""
+    palette = colours([i.label for i in items])
     data = {'up': up, 'marks': [m.record() for m in marks], 'meshes': [
-        {'label': item.label, 'colour': _colour(i), 'faces': len(item.mesh.faces),
+        {'label': item.label, 'colour': palette[item.label], 'faces': len(item.mesh.faces),
          'bounds_mm': item.mesh.bounds.tolist(),
          'stl_base64': base64.b64encode(item.mesh.export(file_type='stl')).decode('ascii')}
         for i, item in enumerate(items)]}
@@ -339,7 +375,7 @@ def _sha256(path):
 
 
 def inspect(mesh_args, out_dir, sections=(), explode_spec=None, marks=(), marks_from=(), up='z',
-            title=None, html_viewer=True, max_preview_faces=MAX_PREVIEW_FACES):
+            title=None, html_viewer=True, max_preview_faces=MAX_PREVIEW_FACES, views=DEFAULT_VIEWS):
     """`mouldflow view`: render every requested picture and return a `mouldflow.result/1` record."""
     if up not in AXES:
         raise ViewError(f'up must be x, y or z: {up!r}')
@@ -347,36 +383,37 @@ def inspect(mesh_args, out_dir, sections=(), explode_spec=None, marks=(), marks_
     items = load_items(specs)
     cuts = [parse_axis_value(s, 'section') for s in sections]
     all_marks = [parse_mark(m) for m in marks] + [m for p in marks_from for m in marks_from_record(p)]
+    assembled = items  # sections and marks always use the assembled pose
     if explode_spec:
         axis, distance = parse_axis_value(explode_spec, 'explode')
         items = explode(items, axis, distance)
     if not cuts:
-        centre = scene_bounds(items).mean(axis=0)
+        centre = scene_bounds(assembled).mean(axis=0)
         cuts = [(a, float(round(centre[i], 3))) for a, i in AXES.items()]
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     title = title or ' + '.join(i.label for i in items)
-    decimated = render_views(items, out / 'views.png', all_marks, up, title, max_preview_faces)
-    summaries = render_sections(items, cuts, out / 'sections.png', all_marks, f'{title} — sections')
+    decimated = render_views(items, out / 'views.png', all_marks, up, title, max_preview_faces, views)
+    summaries = render_sections(assembled, cuts, out / 'sections.png', all_marks, f'{title} — sections')
     evidence = ['views.png', 'sections.png']
     if html_viewer:
         write_html(items, out / 'viewer.html', all_marks, title, up)
         evidence.append('viewer.html')
     meshes = [{'label': item.label, 'path': str(path), 'faces': len(item.mesh.faces),
-               'watertight': bool(item.mesh.is_watertight), 'volume_mm3': float(solid_volume(item.mesh)),
-               'extents_mm': item.mesh.extents.tolist(), 'bounds_mm': item.mesh.bounds.tolist(),
-               'explode_offset_mm': list(item.offset)}
-              for item, (path, _) in zip(items, specs)]
+               'pieces': int(item.mesh.body_count), 'watertight': bool(item.mesh.is_watertight),
+               'volume_mm3': float(solid_volume(item.mesh)), 'extents_mm': item.mesh.extents.tolist(),
+               'bounds_mm': item.mesh.bounds.tolist(), 'explode_offset_mm': list(moved.offset)}
+              for item, moved, (path, _) in zip(assembled, items, specs)]
     limitations = list(LIMITATIONS)
     if decimated:
         limitations.insert(0, f'PNG views decimated to {max_preview_faces} faces for: {", ".join(decimated)}.')
     if explode_spec:
-        limitations.insert(0, f'Parts are exploded ({explode_spec} mm); bounds and section offsets are in the '
-                              'exploded positions, not the assembled pose.')
+        limitations.insert(0, f'Parts are exploded ({explode_spec} mm) in views.png and viewer.html only; mesh '
+                              'bounds, sections and marks use the assembled pose.')
     return ResultRecord(command='view', status='ok', next_action=NEXT_ACTION, evidence=evidence,
                         hashes={item.label: _sha256(path) for item, (path, _) in zip(items, specs)},
                         limitations=limitations,
-                        details={'out_dir': str(out), 'up': up, 'meshes': meshes, 'sections': summaries,
+                        details={'out_dir': str(out), 'up': up, 'views': list(views), 'meshes': meshes, 'sections': summaries,
                                  'marks': [m.record() for m in all_marks], 'preview_decimated': decimated})
 
 

@@ -216,3 +216,52 @@ def test_documented_view_options_exist(doc):
     known = {o for action in view_parser._actions for o in action.option_strings}
     documented = set(re.findall(r'(--[a-z][a-z-]+)', text))
     assert documented and documented <= known, documented - known
+
+
+# --- inspector feedback (first mould-inspector run, 2026-10-17) ----------------------------
+
+def test_cli_reports_piece_count_per_mesh(tmp_path):
+    two = trimesh.util.concatenate([box((0, 0, 0)), box((30, 0, 0), size=(1, 1, 1))])
+    path = tmp_path / 'two.stl'
+    two.export(path)
+    code, out = run('view', path, '--out', tmp_path / 'look', '--no-html')
+    assert code == 0, out
+    assert out['details']['meshes'][0]['pieces'] == 2
+
+
+def test_sections_cut_the_assembled_pose_even_when_exploded(tmp_path):
+    a, b = tmp_path / 'a.stl', tmp_path / 'b.stl'
+    box((0, -5, 0)).export(a)
+    box((0, 5, 0)).export(b)
+    code, out = run('view', a, b, '--out', tmp_path / 'look', '--explode', 'y=40', '--section', 'y=-1',
+                    '--section', 'y=1', '--no-html')
+    assert code == 0, out
+    loops = [{m['label']: m['loops'] for m in s['meshes']} for s in out['details']['sections']]
+    assert loops == [{'a': 1, 'b': 0}, {'a': 0, 'b': 1}]
+    assert out['details']['meshes'][1]['explode_offset_mm'] == pytest.approx([0, 40, 0])
+
+
+def test_colours_follow_labels_not_argument_order():
+    first = view.colours(['object', 'half_1', 'half_2'])
+    assert view.colours(['half_2', 'half_1']) == {k: first[k] for k in ('half_2', 'half_1')}
+    assert len(set(view.colours([f'p{i}' for i in range(len(view.PALETTE))]).values())) == len(view.PALETTE)
+
+
+def test_named_views_are_selectable(tmp_path, scene):
+    assert {'iso', 'iso-back', 'front', 'back', 'left', 'right', 'top', 'bottom'} <= set(view.VIEWS)
+    out = tmp_path / 'v.png'
+    view.render_views(scene, out, views=['back', 'bottom'])
+    assert out.exists()
+    with pytest.raises(view.ViewError):
+        view.render_views(scene, out, views=['sideways'])
+
+
+def test_cli_views_option_and_help_explains_directions(tmp_path):
+    a = tmp_path / 'a.stl'
+    box((0, 0, 0)).export(a)
+    code, out = run('view', a, '--out', tmp_path / 'look', '--views', 'front,back', '--no-html')
+    assert code == 0, out
+    assert out['details']['views'] == ['front', 'back']
+    help_text = subprocess.run([sys.executable, '-m', 'mouldflow.cli', 'view', '--help'],
+                               capture_output=True, text=True).stdout
+    assert 'front' in help_text and 'looks along' in help_text

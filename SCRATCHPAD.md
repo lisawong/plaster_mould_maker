@@ -78,6 +78,13 @@
 
 ## Decisions
 
+- 2026-10-17: First `mould-inspector` run (teapot V7 halves). The answer was correct: closed cavity, intended gate, male/female keys, no fragments. Applied its feedback:
+  - sections, bounds and marks stay in the assembled pose under `--explode`;
+  - `pieces` per mesh;
+  - label-stable colours;
+  - `--views` with documented directions;
+  - the agent returns findings as text and the caller saves FINDINGS.md, because subagents can't write report files.
+
 - 2026-10-17: Stage 2 merged (PR #4). Stage 2.5 added: visual inspection toolkit. `mouldflow view` (PNG views, filled sections, self-contained three.js `viewer.html` pinned to three@0.160.0 on jsDelivr), project skill `/look`, agent `mould-inspector`, `look/` output folder (git-ignored) served by `.claude/launch.json` → `look` on port 8765. Section planes that pass exactly through vertex rings are nudged by 1e-6 × extent and the nudge is recorded.
 
 - 2026-10-17: Code review of PR #4 fixed. Swept intervals (Minkowski sums) replace dense sampling between poses; erosion certificates (Minkowski differences) prove depth below the allowance and contact-only; zero-area faces are input warnings, not `unsupported`; the reported catch location is the deepest component; per-side bounds only tighten, so records are self-consistent.
