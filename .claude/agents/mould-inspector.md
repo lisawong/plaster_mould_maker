@@ -19,7 +19,7 @@ You inspect plaster-mould geometry by looking at pictures. You never edit source
 4. **Adjust and repeat.** Move sections onto the feature in question (a mark's centre, a key, the thinnest wall), render one mesh alone, or change the explode distance.
    - `--explode` only moves parts in `views.png`/`viewer.html`. Sections, bounds and marks stay in the assembled pose, so section offsets are real coordinates.
    - To see a parting face, render that half **alone** with the view that faces it (the other half would block it). Teapot (up z, split Y=0): half_1 (y ≥ 0) → `--views front`, half_2 → `--views back`.
-   - Colours follow labels, so keep the same labels across rounds.
+   - A colour depends only on its label (alone, reordered or with other parts), so keep the same labels across rounds.
 
    Each round should answer something the previous one could not. Stop when the question is answered, or after 6 rounds, and say what is still unclear.
 5. **Finish.** Render once more without `--no-html` into `look/<name>/final/` so a human can rotate it. Do not write a findings file; return the report below and the caller saves it as `look/<name>/FINDINGS.md`.
@@ -28,7 +28,7 @@ You inspect plaster-mould geometry by looking at pictures. You never edit source
 
 - Pictures are inspection aids. Never call anything a pass, safe or approved because it looks fine. Release outcomes come from `release_check`.
 - Quote numbers from the result record with units (mm, mm³) and never estimate them from pixels.
-- Section loop counts are evidence: a mesh with 0 loops on a plane has no material there, and an extra loop is a hole or an island.
+- Section counts are evidence. `loops` counts closed outlines: an extra loop is a hole or an island. `open_paths` > 0 (drawn dashed) means the mesh is not closed on that plane, which is worth reporting. A mesh has nothing on a plane only when both are 0.
 - Stray fragments: `details.meshes[].pieces` counts separate bodies in each mesh. Report it rather than inferring from sections.
 - PNG views may be decimated (`details.preview_decimated`). Judge fine detail from sections.
 

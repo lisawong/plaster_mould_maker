@@ -4,6 +4,7 @@ Pictures are evidence for a human or agent to look at; they never change a techn
 PNG views may be decimated for speed; sections and the HTML viewer always use the full meshes.
 """
 import base64
+import colorsys
 import hashlib
 import html
 import json
@@ -21,9 +22,11 @@ from .result import ResultRecord
 
 AXES = {'x': 0, 'y': 1, 'z': 2}
 THREE_VERSION = '0.160.0'
-# Colours follow labels (crc32 slot), so a part keeps its colour across renders; ordered so that
-# object → tan, half_1 → blue, half_2 → green.
-PALETTE = ('#d4a93c', '#5b8bd0', '#9a7bc7', '#6aa874', '#c99762', '#3fa7a3', '#8c8c8c', '#7f6a5a')
+# A label's colour depends on the label alone, so a part keeps it whether rendered alone, reordered or
+# with other parts. Common mould labels have fixed colours; others get a hashed hue kept clear of the
+# red used for marks (hue 30–330°).
+KNOWN_COLOURS = {'object': '#c99762', 'half_1': '#5b8bd0', 'half_2': '#6aa874'}
+HUE_RANGE = (30., 330.)
 MARK_COLOUR = '#ff2a2a'
 MAX_PREVIEW_FACES = 80000
 # name: (elevation, azimuth, what it shows) in the up-aligned frame. "depth" is the axis after `up`
@@ -92,12 +95,47 @@ def parse_mark(text):
 
 
 def marks_from_record(path):
-    """The worst location from a release assessment or its `mouldflow.result/1` record."""
-    data = json.loads(Path(path).read_text())
-    location = data.get('worst_location') or data.get('details', {}).get('worst_location')
-    if not location or not location.get('bounds_mm'):
+    """The worst location from a release assessment or its `mouldflow.result/1` record.
+
+    No location (or null bounds) gives no marks; anything malformed raises ViewError.
+    """
+    path = Path(path)
+
+    def invalid(why):
+        return ViewError(f'{path}: {why}. Expected a release assessment or its mouldflow.result/1 record, '
+                         'with worst_location.bounds_mm = [[x0, y0, z0], [x1, y1, z1]] in mm.')
+
+    try:
+        data = json.loads(path.read_text())
+    except json.JSONDecodeError as error:
+        raise invalid(f'not valid JSON ({error})') from None
+    if not isinstance(data, dict):
+        raise invalid('the top level is not a JSON object')
+    details = data.get('details')
+    details = {} if details is None else details
+    if not isinstance(details, dict):
+        raise invalid('details is not an object')
+    location = data.get('worst_location')
+    if location is None:
+        location = details.get('worst_location')
+    if location is None:
         return []
-    return [Mark(np.asarray(location['bounds_mm'], float), data.get('outcome') or 'worst_location')]
+    if not isinstance(location, dict):
+        raise invalid('worst_location is not an object')
+    if location.get('bounds_mm') is None:
+        return []
+    try:
+        bounds = np.asarray(location['bounds_mm'], dtype=float)
+    except (TypeError, ValueError):
+        raise invalid('worst_location.bounds_mm is not a 2 × 3 array of numbers') from None
+    if bounds.shape != (2, 3):
+        raise invalid(f'worst_location.bounds_mm has shape {bounds.shape}, not 2 × 3')
+    if not np.isfinite(bounds).all():
+        raise invalid('worst_location.bounds_mm contains NaN or infinity')
+    if (bounds[0] > bounds[1]).any():
+        raise invalid('worst_location.bounds_mm minimum corner exceeds its maximum')
+    outcome = data.get('outcome')
+    return [Mark(bounds, outcome if isinstance(outcome, str) and outcome else 'worst_location')]
 
 
 def parse_axis_value(text, what):
@@ -164,28 +202,35 @@ def preview_mesh(mesh, max_faces=MAX_PREVIEW_FACES):
 
 
 def _cut(mesh, axis, offset):
-    """Section polylines projected to the two remaining axes, nudging off exact vertex planes."""
+    """Section as (closed loops, open paths, nudge), projected to the two remaining axes.
+
+    Open paths come from non-watertight meshes; they are kept so damaged geometry stays visible.
+    Planes exactly through vertex rings return nothing from trimesh, so the cut is retried at ±eps.
+    """
     a = AXES[axis]
     normal = np.eye(3)[a]
+    keep = [i for i in range(3) if i != a]
     eps = 1e-6 * max(float(mesh.extents.max()), 1.)
     for shift in (0., eps, -eps):
         section = mesh.section(plane_origin=normal * (offset + shift), plane_normal=normal)
         if section is not None:
-            keep = [i for i in range(3) if i != a]
-            return [np.asarray(loop)[:, keep] for loop in section.discrete if len(loop) > 1], shift
-    return [], 0.
+            closed = [np.asarray(loop)[:, keep] for loop in section.discrete if len(loop) > 1]
+            open_ = [np.asarray(section.entities[i].discrete(section.vertices))[:, keep]
+                     for i in section.dangling]
+            return closed, [path for path in open_ if len(path) > 1], shift
+    return [], [], 0.
 
 
 def section_loops(items, axis, offset_mm):
     found = []
     for item in items:
-        loops, shift = _cut(item.mesh, axis, offset_mm)
+        loops, open_paths, shift = _cut(item.mesh, axis, offset_mm)
         bounds = None
-        if loops:
-            points = np.vstack(loops)
+        if loops or open_paths:
+            points = np.vstack(loops + open_paths)
             bounds = [points.min(axis=0).tolist(), points.max(axis=0).tolist()]
-        found.append({'label': item.label, 'loops': len(loops), 'bounds_mm': bounds,
-                      'nudged_mm': shift, '_loops': loops})
+        found.append({'label': item.label, 'loops': len(loops), 'open_paths': len(open_paths),
+                      'bounds_mm': bounds, 'nudged_mm': shift, '_loops': loops, '_open': open_paths})
     return found
 
 
@@ -208,18 +253,20 @@ def _up_frame(up):
     return {'z': [0, 1, 2], 'y': [2, 0, 1], 'x': [1, 2, 0]}[up]
 
 
+def label_colour(label):
+    """Pure function of the label: fixed for common labels, else hue from crc32 and lightness from adler32."""
+    if label in KNOWN_COLOURS:
+        return KNOWN_COLOURS[label]
+    data = label.encode()
+    lo, hi = HUE_RANGE
+    hue = lo + (hi - lo) * zlib.crc32(data) / 2 ** 32
+    lightness = .42 + .2 * (zlib.adler32(data) % 1000) / 1000
+    r, g, b = colorsys.hls_to_rgb(hue / 360, lightness, .55)
+    return '#' + ''.join(f'{round(v * 255):02x}' for v in (r, g, b))
+
+
 def colours(labels):
-    """Label → colour from the label's crc32 slot; clashes within one render take the next free slot."""
-    taken, result = set(), {}
-    for label in labels:
-        slot = zlib.crc32(label.encode()) % len(PALETTE)
-        for step in range(len(PALETTE)):
-            if (slot + step) % len(PALETTE) not in taken:
-                slot = (slot + step) % len(PALETTE)
-                break
-        taken.add(slot)
-        result[label] = PALETTE[slot]
-    return result
+    return {label: label_colour(label) for label in labels}
 
 
 def _legend(fig, plt, items, marks, y=.04):
@@ -324,6 +371,8 @@ def render_sections(items, cuts, path, marks=(), title=None):
             colour = palette[section['label']]
             for loop in section['_loops']:
                 ax.plot(loop[:, 0], loop[:, 1], color=colour, linewidth=1.2)
+            for line in section['_open']:  # never closed or filled: there is no enclosed material to show
+                ax.plot(line[:, 0], line[:, 1], color=colour, linewidth=2, linestyle=(0, (4, 2)))
             shape = _oriented_path(section['_loops'])
             if shape is not None:
                 ax.add_patch(PathPatch(shape, facecolor=colour, alpha=.45, edgecolor='none'))
@@ -334,16 +383,21 @@ def render_sections(items, cuts, path, marks=(), title=None):
                 i0, i1 = AXES[keep[0]], AXES[keep[1]]
                 ax.add_patch(Rectangle((b[0, i0], b[0, i1]), b[1, i0] - b[0, i0], b[1, i1] - b[0, i1],
                                        fill=False, edgecolor=MARK_COLOUR, linewidth=2))
-        if not any(s['loops'] for s in found):
-            ax.text(.5, .5, 'no material on this plane', transform=ax.transAxes, ha='center', color='#777')
+        empty = not any(s['loops'] or s['open_paths'] for s in found)
+        if empty:
+            ax.text(.5, .5, 'nothing intersects this plane', transform=ax.transAxes, ha='center', color='#777')
         else:
             ax.autoscale_view()
+            if any(s['open_paths'] for s in found):
+                ax.text(.01, .01, 'dashed = open path (mesh not closed here)', transform=ax.transAxes,
+                        fontsize=8, color='#777')
         ax.set_aspect('equal', adjustable='datalim')
         ax.set_xlabel(f'{keep[0]} (mm)')
         ax.set_ylabel(f'{keep[1]} (mm)')
         ax.grid(True, color='#e3e3e3', linewidth=.6)
         ax.set_title(f'{axis.upper()} = {offset:g} mm', fontsize=12)
-        summaries.append({'axis': axis, 'offset_mm': offset, 'meshes': [_public(s) for s in found]})
+        summaries.append({'axis': axis, 'offset_mm': offset, 'empty': empty,
+                          'meshes': [_public(s) for s in found]})
     _legend(fig, plt, items, marks, y=.02)
     fig.tight_layout(rect=(0, .05, 1, 1 - .7 / (5.2 * rows + 1.2)))
     fig.savefig(path, dpi=110, facecolor=fig.get_facecolor())

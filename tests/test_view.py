@@ -244,7 +244,7 @@ def test_sections_cut_the_assembled_pose_even_when_exploded(tmp_path):
 def test_colours_follow_labels_not_argument_order():
     first = view.colours(['object', 'half_1', 'half_2'])
     assert view.colours(['half_2', 'half_1']) == {k: first[k] for k in ('half_2', 'half_1')}
-    assert len(set(view.colours([f'p{i}' for i in range(len(view.PALETTE))]).values())) == len(view.PALETTE)
+    assert first == {'object': '#c99762', 'half_1': '#5b8bd0', 'half_2': '#6aa874'}
 
 
 def test_named_views_are_selectable(tmp_path, scene):
@@ -265,3 +265,79 @@ def test_cli_views_option_and_help_explains_directions(tmp_path):
     help_text = subprocess.run([sys.executable, '-m', 'mouldflow.cli', 'view', '--help'],
                                capture_output=True, text=True).stdout
     assert 'front' in help_text and 'looks along' in help_text
+
+
+# --- review fixes (REVIEW-HANDOFF.md, 2026-10-17) ------------------------------------------
+
+@pytest.mark.parametrize('content', [
+    [],
+    {'outcome': 'fail', 'worst_location': 'here'},
+    {'outcome': 'fail', 'worst_location': {'bounds_mm': [[0, 0], [1, 1]]}},
+    {'outcome': 'fail', 'worst_location': {'bounds_mm': [[0, 0, 0], [1, 1, float('nan')]]}},
+    {'outcome': 'fail', 'worst_location': {'bounds_mm': [[2, 0, 0], [1, 1, 1]]}},
+    {'outcome': 'fail', 'worst_location': {'bounds_mm': [['a', 0, 0], [1, 1, 1]]}},
+    {'details': [], 'outcome': 'fail'},
+])
+def test_malformed_release_records_give_json_errors(tmp_path, content):
+    a = tmp_path / 'a.stl'
+    box((0, 0, 0)).export(a)
+    record = tmp_path / 'bad.json'
+    record.write_text(json.dumps(content))
+    code, out = run('view', a, '--out', tmp_path / 'look', '--marks-from', record, '--no-html')
+    assert code == 2 and out['status'] == 'error' and out['next_action']
+    assert 'bad.json' in out['error']
+
+
+def test_record_with_null_bounds_gives_no_marks(tmp_path):
+    path = tmp_path / 'r.json'
+    path.write_text(json.dumps({'outcome': 'inconclusive', 'worst_location': {'travel_mm': [0, 1], 'bounds_mm': None}}))
+    assert view.marks_from_record(path) == []
+
+
+def open_box():
+    mesh = box((0, 0, 0))
+    mesh.update_faces(mesh.face_normals[:, 0] < 0.5)  # remove the +X wall
+    return mesh
+
+
+def test_open_section_paths_are_kept_not_reported_empty():
+    [found] = view.section_loops([view.Item('open_box', open_box())], axis='z', offset_mm=0)
+    assert found['loops'] == 0 and found['open_paths'] == 1
+    assert np.array(found['bounds_mm']) == pytest.approx(np.array([[-5, -5], [5, 5]]), abs=1e-6)
+
+
+def test_closed_and_missed_sections_count_no_open_paths():
+    [closed] = view.section_loops([view.Item('box', box((0, 0, 0)))], axis='z', offset_mm=0)
+    assert (closed['loops'], closed['open_paths']) == (1, 0)
+    [missed] = view.section_loops([view.Item('box', box((0, 0, 0)))], axis='z', offset_mm=50)
+    assert (missed['loops'], missed['open_paths'], missed['bounds_mm']) == (0, 0, None)
+
+
+def test_open_paths_are_drawn_unfilled(tmp_path):
+    from matplotlib.path import Path as MplPath
+    [found] = view.section_loops([view.Item('open_box', open_box())], axis='z', offset_mm=0)
+    assert view._oriented_path(found['_loops']) is None, 'open paths must not be closed and filled'
+    assert len(found['_open']) == 1 and isinstance(view._oriented_path(
+        view.section_loops([view.Item('box', box((0, 0, 0)))], 'z', 0)[0]['_loops']), MplPath)
+    summary = view.render_sections([view.Item('open_box', open_box())], [('z', 0.0)], tmp_path / 's.png')
+    assert summary[0]['meshes'][0]['open_paths'] == 1
+    assert summary[0]['empty'] is False
+
+
+@pytest.mark.parametrize('labels', [['wall', 'pattern'], ['pattern', 'wall'], ['pattern'], ['wall'],
+                                    ['object', 'pattern', 'wall', 'half_1', 'extra']])
+def test_colour_is_a_pure_function_of_label(labels):
+    alone = {label: view.colours([label])[label] for label in labels}
+    assert view.colours(labels) == alone
+    assert all(re.fullmatch(r'#[0-9a-f]{6}', c) for c in alone.values())
+
+
+def test_hashed_colours_differ_and_stay_clear_of_mark_red():
+    labels = [f'part{i}' for i in range(40)] + ['wall', 'pattern']
+    found = view.colours(labels)
+    assert len(set(found.values())) == len(labels)
+    import colorsys
+    for colour in found.values():
+        r, g, b = (int(colour[i:i + 2], 16) / 255 for i in (1, 3, 5))
+        hue = colorsys.rgb_to_hls(r, g, b)[0] * 360
+        assert 30 <= hue <= 330, (colour, hue)

@@ -78,6 +78,11 @@
 
 ## Decisions
 
+- 2026-10-17: Stage 2.5 review fixes (REVIEW-HANDOFF.md).
+  - Malformed `--marks-from` records now give JSON errors.
+  - Open section paths are kept: `open_paths`, drawn dashed and unfilled, with per-plane `empty`.
+  - Colours are now a pure function of the label (fixed for object/half_1/half_2, otherwise hashed hue clear of mark red). Stability between renders wins over guaranteed distinctness within one render.
+
 - 2026-10-17: First `mould-inspector` run (teapot V7 halves). The answer was correct: closed cavity, intended gate, male/female keys, no fragments. Applied its feedback:
   - sections, bounds and marks stay in the assembled pose under `--explode`;
   - `pieces` per mesh;

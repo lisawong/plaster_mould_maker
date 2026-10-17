@@ -283,3 +283,29 @@ No implementation or test execution occurred this session. No changes committed 
 - [ ] **User:** choose second STL (blocks Stage 10).
 - [ ] Retire prototype `workflow.ReviewWorkflow` once commands route through `job.Job` (R10.2).
 - [ ] Stages 3–11 per PLAN.md.
+
+## 2026-10-17 23:39 NZDT — Branch review and fix handoff
+
+- Agent: Codex, with standards/spec review subagents.
+- Reviewed `main...HEAD` on `claude/stage-2-5-view` through `f138aa7`.
+- Reproduced three P2 findings: malformed release records escape JSON error handling; open section paths are reported as empty; palette collisions change label colours between rounds.
+- Validation: 166 tests and 72 subtests passed; one existing trimesh warning. No implementation fixes made.
+- Created [REVIEW-HANDOFF.md](REVIEW-HANDOFF.md) with reproductions, test-first fix guidance, and completion criteria.
+- Open todo: resolve all three handoff findings before merging Stage 2.5.
+
+## 2026-10-17 — Stage 2.5 review fixes (local session, branch `claude/stage-2-5-view`)
+
+- Agent: Claude Code (desktop app), Opus 5.5. Input: Codex review in REVIEW-HANDOFF.md (three P2 findings).
+- Tests first: 17 new regression tests in `tests/test_view.py`. All 14 new failing cases failed for the reported reasons: empty stdout or unhelpful errors, `open_paths` missing, colour collisions. The colour test that required 8 unique palette slots was replaced by a pure-function test.
+- Fixes in `src/mouldflow/view.py`:
+  1. `marks_from_record` validates the record (top level, details, location, bounds: finite, ordered, 2 × 3) and raises `ViewError` naming the file, which surfaces as a JSON error with exit 2.
+  2. `_cut` keeps `section.dangling` open paths. Summaries gain `open_paths` and per-plane `empty`. Open paths are drawn dashed and never filled. The empty-plane label now reads "nothing intersects this plane".
+  3. `label_colour`: fixed colours for object/half_1/half_2, otherwise a crc32 hue (30–330°) with adler32 lightness. Independent of order and of which other labels are present.
+- Looked with `/look` (`look/review-sections/`):
+  - open box: dashed U, unfilled, no closing edge;
+  - closed box: filled;
+  - annulus: hole open;
+  - Z=20: empty.
+- Docs: TECHNICAL-REFERENCE section contract and colours, mould-inspector rules, PLAN status, SCRATCHPAD decision.
+- Result: **183 passed**, 72 subtests (one existing trimesh warning).
+- Not committed (not mine): `.agents/` and `.codex/` (Codex copies of the skill and agent).
