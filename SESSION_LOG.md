@@ -336,3 +336,23 @@ No implementation or test execution occurred this session. No changes committed 
 - [ ] **User:** choose second STL (blocks Stage 10).
 - [ ] Retire prototype `workflow.ReviewWorkflow` / `review.py prepare` once commands route through `job.Job` (R10.2).
 - [ ] Stages 4–11 per PLAN.md.
+
+## 2026-10-18 — Stage 3 branch review against main
+
+- Agent: Codex, with standards and spec review subagents as required by the code-review skill.
+- Reviewed `main...HEAD` (`76754ef` → `2597c45`), using Stage 3 review notes and recorded requirements.
+- Four findings recorded in `review-notes/STAGE-3-REVIEW-HANDOFF.md`: silent non-finite face removal (P1), unrequested degenerate cleanup during stitch (P2), retry drops rotations (P2), saved-source re-intake fails (P2).
+- Full suite: 222 passed, 72 subtests passed, one existing trimesh warning. Inspected existing teapot r001 views/sections; no browser interaction or fresh teapot run.
+- No implementation/test changes. Open todo: dev agent fixes these findings test-first before Stage 3 completion.
+
+## 2026-10-18 — Stage 3 review fixes (branch `claude/stage-3-intake`)
+
+- Agent: Claude Code (VS Code extension), Opus 5.5. Input: Codex review in `review-notes/STAGE-3-REVIEW-HANDOFF.md` (one P1 and three P2 findings). The resolution is recorded in that file.
+- Tests first: 5 regression tests in `tests/test_intake.py`, all failing for the reported reasons.
+- Fixes in `src/mouldflow/intake.py`:
+  1. non-finite coordinates are rejected before load processing (at intake), with no silent triangle removal;
+  2. `stitch` is refused while zero-area faces remain;
+  3. the suggested retry command keeps the attempted `--rotate` flags;
+  4. re-intake works from the job's own `source/` copy.
+- The teapot V7 rerun after the loader change is identical. **227 passed**, 72 subtests.
+- Open todo: review agent re-checks the fixes, or the user pushes and opens the Stage 3 PR.

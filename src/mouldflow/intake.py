@@ -51,9 +51,10 @@ class IntakeError(JobError):
 class InputRejected(IntakeError):
     """The mesh is not a valid single closed solid. Carries every problem and its repair, if any."""
 
-    def __init__(self, problems, applied=()):
+    def __init__(self, problems, applied=(), rotations=()):
         self.problems = problems
         self.applied = list(applied)
+        self.rotations = list(rotations)
         self.outcome = 'unsupported' if any(p['repair'] is None for p in problems) else None
         super().__init__('input rejected: ' + '; '.join(p['message'] for p in problems))
 
@@ -62,7 +63,8 @@ class InputRejected(IntakeError):
             fatal = ', '.join(p['code'] for p in self.problems if p['repair'] is None)
             return (f'Input is unsupported ({fatal}); mouldflow cannot repair this. Tell the human, fix the '
                     'source STL in a modelling tool, then start a new job with `mouldflow job init`.')
-        flags = [_flag(a) for a in self.applied] + [f'--repair {p["repair"]}' for p in self.problems]
+        flags = [f'--rotate {axis.lower()}={degrees}' for axis, degrees in self.rotations]
+        flags += [_flag(a) for a in self.applied] + [f'--repair {p["repair"]}' for p in self.problems]
         return ('Show the human these problems and ask whether to repair them. If they agree, rerun '
                 f'`mouldflow prepare DIR {" ".join(dict.fromkeys(flags))}` (stitch=TOL: a gap tolerance in '
                 'mm the human chooses, e.g. 0.01). Never repair without asking.')
@@ -78,13 +80,23 @@ def _sha256(path):
 
 
 def _load(data, name):
-    """Load STL bytes as one triangle mesh, merging duplicate vertices as every later stage will."""
+    """Load STL bytes as one triangle mesh, merging duplicate vertices as every later stage will.
+
+    Non-finite coordinates are rejected before processing, which would otherwise delete those
+    triangles silently. Vertex merging is the only cleanup applied.
+    """
     try:
-        mesh = trimesh.load(io.BytesIO(data), file_type='stl', force='mesh', process=True)
+        with np.errstate(invalid='ignore'):  # face normals of non-finite triangles
+            mesh = trimesh.load(io.BytesIO(data), file_type='stl', force='mesh', process=False)
     except Exception as error:  # trimesh raises many types for malformed files
         raise IntakeError(f'{name}: could not read as an STL triangle mesh ({error})') from error
     if not isinstance(mesh, trimesh.Trimesh) or not len(mesh.faces):
         raise IntakeError(f'{name}: no triangles found; is this an STL mesh?')
+    bad = int(np.count_nonzero(~np.isfinite(mesh.triangles).all(axis=(1, 2))))
+    if bad:
+        raise InputRejected([_problem('non_finite', f'{name}: {bad} triangles have non-finite coordinates '
+                                                    '(NaN or infinity)', bad)])
+    mesh.merge_vertices()
     return mesh
 
 
@@ -115,7 +127,9 @@ def intake(job, stl, units, target_mm=None, target_axis=None, purpose=None):
     if recorded.file and (recorded.file != rel or recorded.sha256 != digest):
         raise IntakeError(f'this job already has source {recorded.file}; a different STL needs a new job '
                           '(`mouldflow job init`)')
-    shutil.copyfile(stl, job.root / rel)
+    destination = job.root / rel
+    if not (destination.exists() and destination.resolve() == stl.resolve()):
+        shutil.copyfile(stl, destination)
     job.update_settings(job.settings.with_overrides({'source': {
         'file': rel, 'sha256': digest, 'units': units, 'target_mm': target_mm, 'target_axis': axis,
         'purpose': purpose}}))
@@ -215,6 +229,10 @@ def apply_repairs(mesh, requested):
         if name not in current:
             raise IntakeError(f'repair {name} was requested but the mesh has no problem it fixes; '
                               'drop it (repairs only run for reported problems)')
+        if name == 'stitch' and 'drop-degenerate' in current:
+            # stitch_boundaries drops zero-area faces; only its own new fan slivers may go unasked.
+            raise IntakeError('repair stitch would also delete the zero-area source faces; ask the human about '
+                              '--repair drop-degenerate as well')
         mesh, info = _repair(mesh, name, by_name[name])
         applied.append(info)
     return mesh, applied
@@ -268,9 +286,9 @@ def prepare(job, rotations=(), repairs=()):
     mesh, applied = apply_repairs(before, list(repairs))
     # The cheap pass decides; a rejection reruns the full check so it lists every reason.
     if applied and validate(mesh, check_self_intersections=False):
-        raise InputRejected(validate(mesh), applied)
+        raise InputRejected(validate(mesh), applied, rotations)
     if not applied and problems:
-        raise InputRejected(validate(before))
+        raise InputRejected(validate(before), rotations=rotations)
 
     transform = _rotation_matrix(rotations)
     mesh = mesh.copy()
@@ -290,7 +308,7 @@ def prepare(job, rotations=(), repairs=()):
     prepared = _load(data, 'prepared.stl')
     final_problems = validate(prepared)
     if final_problems:
-        raise InputRejected(final_problems, applied)
+        raise InputRejected(final_problems, applied, rotations)
 
     if rotations != source.rotations:
         job.update_settings(job.settings.with_overrides({'source': {'rotations': [list(r) for r in rotations]}}))

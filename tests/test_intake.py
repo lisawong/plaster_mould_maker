@@ -4,6 +4,7 @@ Scale is never guessed, invalid meshes are rejected with reasons, repairs only r
 and every prepare is a new revision that invalidates downstream gates.
 """
 import json
+import shlex
 
 import numpy as np
 import pytest
@@ -300,3 +301,86 @@ def test_changed_source_bytes_block_prepare(job, tmp_path):
     with pytest.raises(IntakeError, match='changed'):
         prepare(job)
     assert Job.open(job.root).gate_status('input') is GateStatus.STALE
+
+
+# --- review fixes (review-notes/STAGE-3-REVIEW-HANDOFF.md, 2026-10-18) -----------------------
+
+@pytest.mark.parametrize('bad', [np.nan, np.inf])
+def test_non_finite_source_is_rejected_not_cleaned(job, tmp_path, bad):
+    """Finding 1: loading must not silently delete the bad triangle and pass a clean box."""
+    box = trimesh.creation.box()
+    vertices = np.vstack([box.vertices, [[bad, 0, 0], [2, 0, 0], [2, 1, 0]]])
+    faces = np.vstack([box.faces, [[8, 9, 10]]])
+    with np.errstate(invalid='ignore'):  # trimesh computes normals of the bad triangle while writing
+        stl = _write(trimesh.Trimesh(vertices, faces, process=False), tmp_path / 'bad.stl')
+    with pytest.raises(InputRejected) as error:
+        intake(job, stl, units='mm')
+    assert codes(error) == {'non_finite'} and error.value.outcome == 'unsupported'
+    assert error.value.problems[0]['count'] == 1
+    assert not any((job.root / 'source').iterdir())
+    assert not (job.root / 'candidates' / 'input').exists()
+    assert job.gate_status('input') is GateStatus.NOT_SUBMITTED
+
+
+def degenerate_and_open_stl(path):
+    """Finding 2: a T-junction (open) plus an unrelated zero-area face."""
+    box = trimesh.creation.box((10, 20, 30))
+    vertices, faces = box.vertices.tolist(), box.faces.tolist()
+    a, b, c = faces[0]
+    m = len(vertices)
+    vertices.append(((np.array(vertices[a]) + np.array(vertices[b])) / 2).tolist())
+    faces[0] = [a, m, c]
+    faces += [[m, b, c], [a, a, a]]
+    return _write(trimesh.Trimesh(vertices, faces, process=False), path)
+
+
+def test_stitch_never_drops_source_faces_unasked(job, tmp_path):
+    intake(job, degenerate_and_open_stl(tmp_path / 'bad.stl'), units='mm')
+    with pytest.raises(InputRejected) as error:
+        prepare(job)
+    assert {'degenerate_faces', 'open'} <= codes(error)
+    with pytest.raises(IntakeError, match='drop-degenerate'):
+        prepare(job, repairs=['stitch=0.01'])
+    assert not (job.root / 'candidates' / 'input').exists()
+    record = prepare(job, repairs=['drop-degenerate', 'stitch=0.01'])
+    repairs = record.details['repairs']
+    assert [r['repair'] for r in repairs] == ['drop-degenerate', 'stitch']
+    assert repairs[0]['faces_removed'] >= 1
+
+
+def _suggested_flags(next_action):
+    command = next_action.split('`mouldflow prepare DIR ', 1)[1].split('`', 1)[0]
+    return shlex.split(command)
+
+
+def test_suggested_retry_keeps_rotations(job, tmp_path):
+    """Finding 3: following the suggested command must reproduce the declared orientation."""
+    box = trimesh.creation.box((1, 2, 3))
+    box.invert()
+    intake(job, _write(box, tmp_path / 'inverted.stl'), units='mm', target_mm=30, target_axis='Z')
+    with pytest.raises(InputRejected) as error:
+        prepare(job, rotations=['x=90', 'z=90'])
+    flags = _suggested_flags(error.value.next_action())
+    assert flags == ['--rotate', 'x=90.0', '--rotate', 'z=90.0', '--repair', 'fix-winding']
+    rotations = [v for k, v in zip(flags, flags[1:]) if k == '--rotate']
+    repairs = [v for k, v in zip(flags, flags[1:]) if k == '--repair']
+    record = prepare(job, rotations=rotations, repairs=repairs)
+    # (1,2,3) -x90-> (1,3,2) -z90-> (3,1,2); Z = 30 mm -> scale 15
+    assert prepared_mesh(job, record).extents == pytest.approx([45, 15, 30], abs=1e-4)
+
+
+def test_reintake_from_the_saved_source(job, tmp_path):
+    """Finding 4: the job's own copy works once the external original is gone."""
+    stl = box_stl(tmp_path / 'box.stl')
+    original = stl.read_bytes()
+    intake(job, stl, units='mm')
+    prepare(job)
+    _approve_input_and_plaster(job)
+    stl.unlink()
+    record = intake(job, job.root / 'source' / 'box.stl', units='cm')
+    assert record.status == 'ok'
+    assert (job.root / 'source' / 'box.stl').read_bytes() == original
+    reopened = Job.open(job.root)
+    assert reopened.settings.source.units == 'cm'
+    assert reopened.gate_status('input') is GateStatus.STALE
+    assert reopened.gate_status('plaster') is GateStatus.STALE

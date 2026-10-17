@@ -40,7 +40,7 @@ The PR template (`.github/pull_request_template.md`) carries this checklist.
 - **Tests (first):** marks from both record shapes; explode direction; section loop counts (ring = 2, miss = 0); red mark pixels appear; HTML embeds every mesh at full face count, escapes labels, pins three.js; CLI record and JSON errors; skill/agent docs use only real flags.
 
 ## Stage 3 — Intake & prepare
-- **Status:** in progress on branch `claude/stage-3-intake` (not pushed yet) — 222 tests green locally. Design decisions: SCRATCHPAD 2026-10-18.
+- **Status:** in progress on branch `claude/stage-3-intake` (not pushed yet) — 227 tests green locally; Codex review findings (review-notes/STAGE-3-REVIEW-HANDOFF.md, local only) fixed. Design decisions: SCRATCHPAD 2026-10-18.
 - **Build:** `mouldflow intake`, `mouldflow prepare`: hash source, require units, validate mesh, apply scale/orientation as a new revision, simple PNG previews for the input gate.
 - **Tests (first):** invalid meshes rejected with reasons; scale never guessed; repairs create revisions and invalidate downstream.
 
