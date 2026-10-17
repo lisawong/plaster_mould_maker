@@ -26,6 +26,8 @@ This is a proposed evaluation protocol, not completed evidence. Select the opera
 | Good plaster release but trapped printed form | Fail the second release problem separately. |
 | Printer-too-small geometry | Valid alternative orientation/partition or clear failure; no silent scale change. |
 
+Stage 2 implements the release-depth rows (thin overlap, deep catch, loose bound, contact/sliver, between-sample catch, invalid mesh) as `mouldflow.known_answers` fixtures, asserted in `tests/test_known_answers.py`. Partition, staged-removal, form and printer rows arrive with their stages.
+
 ## State and human-review tests
 
 - A pending gate blocks its dependent stage; a missing response never becomes approval.

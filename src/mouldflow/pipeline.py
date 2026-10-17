@@ -42,6 +42,59 @@ def box_between(lo, hi):
     return mesh
 
 
+def solid_volume(mesh):
+    """Signed enclosed volume in mm3 via the divergence theorem.
+
+    trimesh's ``volume`` goes through mass properties, which divide by the volume for
+    the centre of mass; zero-thickness Boolean results (touching solids) then raise
+    divide-by-zero RuntimeWarnings. This computes the volume alone.
+    """
+    if not len(mesh.faces):
+        return 0.
+    t=mesh.triangles
+    return float(np.einsum('ij,ij->i',t[:,0],np.cross(t[:,1],t[:,2])).sum()/6)
+
+
+def is_solid(mesh):
+    """trimesh's ``is_volume`` without its centre-of-mass step, which warns on zero-volume
+    closed fragments. Closed, consistently wound and positive volume."""
+    return bool(len(mesh.faces) and mesh.is_watertight and mesh.is_winding_consistent and solid_volume(mesh)>0)
+
+
+def to_manifold(mesh):
+    import manifold3d
+    return manifold3d.Manifold(manifold3d.Mesh(vert_properties=np.asarray(mesh.vertices,np.float32),
+                                               tri_verts=np.asarray(mesh.faces,np.uint32)))
+
+
+def from_manifold(solid):
+    result=solid.to_mesh()
+    return trimesh.Trimesh(np.asarray(result.vert_properties)[:,:3],np.asarray(result.tri_verts),process=False)
+
+
+def sweep(mesh, direction, length, thickness=1e-4):
+    """Solid swept by `mesh` translating `length` mm along unit `direction`.
+
+    Minkowski sum with a segment, built as a `thickness` x `thickness` prism (Manifold needs a
+    solid), so the result is a superset of the exact sweep by at most thickness/sqrt(2) mm.
+    """
+    direction=np.asarray(direction,float)/np.linalg.norm(direction)
+    segment=box_between([-thickness/2,-thickness/2,0],[thickness/2,thickness/2,length])
+    segment.apply_transform(trimesh.geometry.align_vectors([0,0,1],direction))
+    return from_manifold(to_manifold(mesh).minkowski_sum(to_manifold(segment)))
+
+
+def erode(mesh, radius):
+    """Points whose distance below the surface is at least about `radius` (Minkowski difference).
+
+    Eroding by an icosahedral polytope inscribed in the radius ball gives a superset of the
+    exact ball erosion, so "nothing meets the eroded solid" still proves "nothing is `radius`
+    deep". Returns an empty mesh when the solid is thinner than that everywhere.
+    """
+    ball=trimesh.creation.icosphere(subdivisions=1,radius=radius)
+    return from_manifold(to_manifold(mesh).minkowski_difference(to_manifold(ball)))
+
+
 def boolean(op, meshes):
     return getattr(trimesh.boolean,op)(meshes,engine='manifold')
 
@@ -101,7 +154,7 @@ def check_release(moving, fixed, direction, distances, tolerance_mm3=0.001):
     for distance in distances:
         shifted=moving.copy(); shifted.apply_translation(direction*distance)
         intersection=boolean('intersection',[shifted,fixed])
-        volume=max(0,float(intersection.volume)) if len(intersection.faces) else 0.
+        volume=max(0.,solid_volume(intersection))
         samples.append(dict(distance_mm=float(distance),intersection_mm3=volume))
     return dict(passed=all(s['intersection_mm3']<=tolerance_mm3 for s in samples),
                 tolerance_mm3=tolerance_mm3,samples=samples,

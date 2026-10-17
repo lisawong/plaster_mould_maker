@@ -187,3 +187,49 @@ No implementation or test execution occurred this session. No changes committed 
 ### Workflow update — 2026-09-26
 
 - User asked that docs be updated before each PR rather than after merge. Added a "Docs before every PR" rule to PLAN.md's Working mode and a PR template with the docs checklist. This wrap + workflow change goes to `main` as one PR.
+
+## 2026-09-26 — Stage 2 (cloud session, branch `claude/stage-2-f3zrxy`)
+
+- Session state: PR #3 (docs workflow) merged; clean `main`, 116 tests green before starting.
+- Agent: Claude Code on the web.
+- Goal: Stage 2 — known-answer fixtures, depth-semantics audit, adaptive refinement, `inconclusive`, trimesh warnings.
+
+### Work done
+
+- Tests first: `tests/test_known_answers.py` (21 tests at first, 10 fixtures as subtests; 23 by the end) failed at collection before implementation.
+- `known_answers.py`: fixtures with independently known depth/outcome — clean withdrawal, thin-wide overlap, deep catch, bound wider than depth, zero-thickness contact, near-coplanar sliver (1e-5 mm) and shallow sliver (0.02 mm), between-sample catch, thin fixed wall, self-intersecting input.
+- `release_check.assess_release`: two-sided depth, 1-Lipschitz whole-motion bound from 0 to clearance, spatial refinement (interior cell branch-and-bound) then temporal bisection, contact tolerance, five outcomes, input validation; `assessment_record` wraps it in `mouldflow.result/1`.
+- Audit findings (full list in TECHNICAL-REFERENCE, "Stage 2 depth-semantics audit"): one-sided depth misses thin fixed walls; coarse samples miss catches; slab bound can straddle the allowance; convex-enclosure "measured" depth is not a measurement.
+- trimesh warnings: root cause is mass-property volume (centre of mass ÷ volume) on zero-volume Boolean results. Added `pipeline.solid_volume` / `is_solid`; `check_release` and `collision_depth_bound` use them. One warning remains from the baseline test `test_local_insert.py`'s own `.volume` call (left verbatim).
+- `_boundary_bound` / `collision_depth_bound` gained an optional `max_levels` (default 12 = prototype behaviour).
+- Result: **139 passed** locally (116 + 23).
+
+### Notes for later stages
+
+- Stage 4 should call `assess_release` for plaster/object and half/half pairs and put `assessment_record` into the job's plaster submission. Pass `check_self_intersections=False` only when Stage 3 validation already covered the mesh.
+- Stage 5: exploratory teapot probe (TECHNICAL-REFERENCE audit item 9). A first run exposed a false "inside" from containment on thin fragments (fixed; interior cells now test the input solids). After the fix the assembled pose brackets to ≤ 0.25 mm for both halves, but refining that one pose took 4–12 minutes. Performance work is needed before the V7 regression (SCRATCHPAD A033).
+- `/code-review ultra` is planned for this PR.
+
+### Open todos
+
+- [ ] **User:** review and merge PR #4 (https://github.com/lisawong/plaster_mould_maker/pull/4) once CI is green; decide A032 (strict_pass wording).
+- [ ] **User:** print `prints/groove-coupon/` and report best slot + fill-line legibility (A026).
+- [ ] **User:** choose second STL (blocks Stage 10).
+- [ ] Retire prototype `workflow.ReviewWorkflow` once commands route through `job.Job` (R10.2).
+- [ ] Stages 3–11 per PLAN.md.
+
+### Code review fixes — 2026-10-17 (PR #4)
+
+- A full-effort code review of PR #4 found that the 1-Lipschitz bound needed samples closer than twice the allowance wherever depth is zero. A clean 60 mm sliding withdrawal at the 0.1 mm default came back `inconclusive` after 200 samples (reproduced).
+- Tests first: fixtures `long-sliding-withdrawal` and `wide-sliver-and-deep-catch`; tests for location, per-side record consistency, degenerate-face inputs and erosion certificates.
+- Fixes:
+  - Swept intervals: `pipeline.sweep`, a Minkowski sum with a 1e-4 mm segment prism, gives the exact union of overlaps between samples.
+  - Erosion certificates: `pipeline.erode`, a Minkowski difference by an inscribed ball, certifies at 0.999 × allowance and at the contact tolerance. Default seeds are now just 0 and the clearance.
+  - Zero-area faces are `input_warnings` rather than `unsupported`.
+  - `worst_location` reports the deepest component.
+  - Per-side bounds only tighten.
+  - Measured-depth candidates are tried in batches.
+  - The contact-fragment rank test is shared (`release_depth.is_contact_fragment`), and sliver faces are dropped by a relative determinant test.
+- The pin withdrawals now pass `strict_pass` in 0.4 s with 2 samples. Result: **143 passed**.
+- Teapot full assessment (exploratory): half A conditional_finishing in 187 s (measured 0.066 mm, certified < 0.4995 mm), half B conditional_finishing in 174 s (measured 0.097 mm, certified < 0.4995 mm) at the demo's 0.5 mm allowance, 2 samples each (0 and clearance).
+- Not addressed (out of scope): older modules (`simplify.py`, `print_layout.py`, `contour_seam.py`, `review.py`) still call trimesh `volume`/`is_volume` and can emit the same warnings.
