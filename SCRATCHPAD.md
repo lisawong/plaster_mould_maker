@@ -78,11 +78,13 @@
 
 ## Decisions
 
+- 2026-10-18: Review loop as practised on Stage 3 and kept going forward. The dev agent writes `review-notes/<STAGE>-REVIEW-REQUEST.md` (scope, agreed behaviour, where to look hardest). The review agent (Codex) writes `<STAGE>-REVIEW-HANDOFF.md` with findings and changes no code. The dev agent fixes each finding test-first and appends a resolution, and rounds repeat until the review agent says good to merge. Then: PR, CI green, merge. Stage 3 took three rounds: one P1 (non-finite triangles silently dropped on load) and three P2s, all fixed.
+
 - 2026-10-18: Stage 3 (intake & prepare) design, agreed with the user:
   - **Scale:** `--units mm|cm|m|in` is always required at intake (never guessed). `--target-mm`/`--target-axis` optionally rescale so the prepared extent on that axis matches. Every factor is recorded.
   - **Orientation:** `mouldflow prepare --rotate AXIS=DEG` (repeatable, applied in order about fixed axes) is stored in `settings.source`, so changing it invalidates the input gate. The canonical frame is Z-up. Order: units → repairs → rotations → target scale → centre at origin.
   - **Repairs:** only when requested (`--repair drop-degenerate|fix-winding|stitch=TOL`). Invalid meshes are rejected with reasons and suggested repairs, and nothing is auto-fixed. A requested repair that matches no reported problem is an error. Multiple components, self-intersections, zero volume and non-finite vertices cannot be repaired (`unsupported`).
-  - **Degenerate faces:** zero-area faces reject a *source* STL (PRD R2.1). Generated Boolean meshes keep the Stage 2 warning behaviour.
+  - **Degenerate faces:** zero-area faces reject a *source* STL (PRD R2.1). Generated Boolean meshes keep the Stage 2 warning behaviour. (Re-review, same day: widened to zero area **or** trimesh's near-zero-height test, the stitcher's own cleanup predicate, so stitch can never silently remove a source face.)
   - Each successful prepare writes a new revision folder `candidates/input/rNNN/` (never overwritten) and submits the input gate, which invalidates anything downstream. A rejected prepare writes nothing. One job has one source STL; a different file needs a new job.
 
 - 2026-10-18: The workflow now has a separate **review agent** alongside the **dev agent**. They communicate through files in `review-notes/` (git-ignored, local only): the review agent writes findings/handoffs there, the dev agent works from them and records resolutions back in the same file. First file: `review-notes/REVIEW-HANDOFF.md` (Stage 2.5 review, moved from the repo root).

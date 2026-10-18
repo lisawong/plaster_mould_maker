@@ -44,7 +44,7 @@ Pictures are inspection aids. Outcomes always come from the release checks.
   - `result.py` — versioned JSON result record (`mouldflow.result/1`), outcomes and unit-tagged metrics.
   - `parts.py` — generic parts, release directions and removal order (`two_part_planar` for Release 1).
   - `job.py` — job folder and the four hash-bound review gates (input → plaster → forms → export).
-  - `cli.py` — `mouldflow job init|status|decide`; other arguments fall through to the prototype generator.
+  - `cli.py` — `mouldflow job init|status|decide` (later stages add `view`, `intake`, `prepare`); other arguments fall through to the prototype generator.
   Stage 2 added:
   - `release_check.py` — `assess_release`: two-sided penetration depth (mm) over the whole motion (samples plus Minkowski-swept intervals, erosion certificates), adaptive refinement and `strict_pass` / `conditional_finishing` / `inconclusive` / `fail` / `unsupported`.
   - `known_answers.py` — known-answer release fixtures for the EVALUATION-PLAN geometry rows.
@@ -54,7 +54,7 @@ Pictures are inspection aids. Outcomes always come from the release checks.
   - `intake.py` — `mouldflow intake` (copy + hash source, declared units/target) and `mouldflow prepare` (validate, opt-in repairs, rotate, scale, centre; `candidates/input/rNNN/` with before/after previews; submits the input gate).
 - `.claude/skills/look/`, `.claude/agents/mould-inspector.md`, `.claude/launch.json` — visual-inspection skill, iterating inspector agent and the `look` preview server.
 - `.agents/skills/look/`, `.codex/agents/mould-inspector.toml` — the same skill and agent for Codex (used as a review agent). Edit the Claude versions and copy them across; `tests/test_view.py` fails if the copies differ.
-- `review-notes/` — local only (git-ignored). The dev agent and the separate review agent hand work to each other through files here (e.g. `REVIEW-HANDOFF.md`).
+- `review-notes/` — local only (git-ignored). The dev agent and the separate review agent hand work to each other through files here: the dev agent writes a `*-REVIEW-REQUEST.md`, the review agent answers in a `*-REVIEW-HANDOFF.md`, and the dev agent records resolutions in that same file (e.g. `STAGE-3-REVIEW-REQUEST.md` / `STAGE-3-REVIEW-HANDOFF.md`).
 - `tests/` — pytest suite: 45 ported baseline tests, coupon tests, Stage 1 job/schema tests, Stage 2 known-answer release tests, Stage 2.5 view tests and Stage 3 intake/prepare tests.
   - `tests/fixtures/teapot-v7/` — accepted V7 source, prepared object and plaster halves for the Stage 5 regression; see its `PROVENANCE.md`.
   - `tests/fixtures/historical/` — older three-part study used only by `test_scene_artifact` (historical, not V7 evidence).

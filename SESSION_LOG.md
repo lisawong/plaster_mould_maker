@@ -394,3 +394,25 @@ No implementation or test execution occurred this session. No changes committed 
 - [ ] **User:** choose second STL (blocks Stage 10).
 - [ ] Retire prototype `workflow.ReviewWorkflow` / `review.py prepare` once commands route through `job.Job` (R10.2).
 - [ ] Stage 4 (plaster mould for a given plane) next; Stages 5–11 per PLAN.md.
+
+## 2026-10-18 — Session wrap
+
+- Agent: Claude Code (VS Code extension), Opus 5.5.
+- Accomplished this session:
+  - Set up the dev ↔ review agent workflow. `review-notes/` is a git-ignored folder, and `REVIEW-HANDOFF.md` moved into it.
+  - Stage 3 (intake & prepare) built test-first on `claude/stage-3-intake`. The design was agreed with the user (units required, `--rotate`, opt-in repairs, degenerate faces reject a source STL).
+  - Wrote the review request. Codex reviewed in three rounds, and all 4 findings were fixed test-first: non-finite triangles, stitch removing source faces, retry dropping rotations, re-intake from the saved source.
+  - Teapot V7 checked visually and numerically: prepare reproduces the prototype's prepared object exactly.
+  - PR #6 opened. CI was green, it was merged into `main` (`df90c2a`) and pulled locally. Tests: **230 passed**.
+  - Wrap: README structure (cli commands, review-notes workflow) and SCRATCHPAD (review-loop decision, widened degenerate rule) updated.
+
+### Open todos
+
+- [x] Stage 3 intake & prepare: merged (PR #6).
+- [x] Review agent pass on Stage 3: good to merge.
+- [ ] Stage 4: plaster mould for any given plane (parameterize `pipeline.py`, ordered release checks). Use `/code-review ultra` per PLAN, plus the review-notes loop.
+- [ ] **User:** print `prints/groove-coupon/` and report best slot + fill-line legibility (A026).
+- [ ] **User:** choose second STL (blocks Stage 10).
+- [ ] Retire prototype `workflow.ReviewWorkflow` / `review.py prepare` once commands route through `job.Job` (R10.2).
+- [ ] Optional: delete the merged remote branch `claude/stage-3-intake` (earlier stage branches were kept too).
+- [ ] Stages 5–11 per PLAN.md.
