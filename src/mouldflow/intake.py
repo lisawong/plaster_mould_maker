@@ -63,10 +63,11 @@ class InputRejected(IntakeError):
             fatal = ', '.join(p['code'] for p in self.problems if p['repair'] is None)
             return (f'Input is unsupported ({fatal}); mouldflow cannot repair this. Tell the human, fix the '
                     'source STL in a modelling tool, then start a new job with `mouldflow job init`.')
-        flags = [f'--rotate {axis.lower()}={degrees}' for axis, degrees in self.rotations]
-        flags += [_flag(a) for a in self.applied] + [f'--repair {p["repair"]}' for p in self.problems]
+        # Rotations repeat meaningfully and stay in order; only repair flags are deduplicated.
+        rotate = [f'--rotate {axis.lower()}={degrees}' for axis, degrees in self.rotations]
+        repair = dict.fromkeys([_flag(a) for a in self.applied] + [f'--repair {p["repair"]}' for p in self.problems])
         return ('Show the human these problems and ask whether to repair them. If they agree, rerun '
-                f'`mouldflow prepare DIR {" ".join(dict.fromkeys(flags))}` (stitch=TOL: a gap tolerance in '
+                f'`mouldflow prepare DIR {" ".join(rotate + list(repair))}` (stitch=TOL: a gap tolerance in '
                 'mm the human chooses, e.g. 0.01). Never repair without asking.')
 
 
@@ -148,14 +149,25 @@ def _problem(code, message, count=None):
             'repair': ('stitch=TOL' if FIXES[code] == 'stitch' else FIXES[code]) if code in FIXES else None}
 
 
+def degenerate_faces(mesh):
+    """Mask of zero-area or near-zero-height faces.
+
+    Includes trimesh's `nondegenerate_faces()` height test (default tolerance tol.merge, 1e-8 mm),
+    the same predicate `repair.stitch_boundaries` uses to clean up. Validation, the stitch guard and
+    drop-degenerate therefore all agree: stitch can never remove a source face nobody flagged.
+    """
+    return (mesh.area_faces <= DEGENERATE_AREA_MM2) | ~mesh.nondegenerate_faces()
+
+
 def validate(mesh, check_self_intersections=True):
     """Reasons `mesh` (in mm) is not a single closed solid (PRD R2.1). Empty list means valid."""
     if not np.isfinite(mesh.vertices).all():
         return [_problem('non_finite', 'vertices are not finite (NaN or infinity)')]
     problems = []
-    degenerate = int(np.count_nonzero(mesh.area_faces <= DEGENERATE_AREA_MM2))
+    degenerate = int(np.count_nonzero(degenerate_faces(mesh)))
     if degenerate:
-        problems.append(_problem('degenerate_faces', f'{degenerate} zero-area faces', degenerate))
+        problems.append(_problem('degenerate_faces', f'{degenerate} zero-area or near-zero-height faces',
+                                 degenerate))
     if not mesh.is_watertight:
         edges = int(np.count_nonzero(np.bincount(mesh.edges_unique_inverse) != 2))
         problems.append(_problem('open', f'not closed: {edges} edges not shared by exactly two faces '
@@ -200,7 +212,7 @@ def parse_repair(text):
 
 def _repair(mesh, name, tolerance):
     if name == 'drop-degenerate':
-        keep = mesh.area_faces > DEGENERATE_AREA_MM2
+        keep = ~degenerate_faces(mesh)
         result = mesh.copy()
         result.update_faces(keep)
         result.remove_unreferenced_vertices()
@@ -230,8 +242,10 @@ def apply_repairs(mesh, requested):
             raise IntakeError(f'repair {name} was requested but the mesh has no problem it fixes; '
                               'drop it (repairs only run for reported problems)')
         if name == 'stitch' and 'drop-degenerate' in current:
-            # stitch_boundaries drops zero-area faces; only its own new fan slivers may go unasked.
-            raise IntakeError('repair stitch would also delete the zero-area source faces; ask the human about '
+            # stitch_boundaries drops faces failing the same test as degenerate_faces(), so once none
+            # remain, it can only remove slivers its own fans created.
+            raise IntakeError('repair stitch would also delete the degenerate (zero-area or near-zero-height) '
+                              'source faces; ask the human about '
                               '--repair drop-degenerate as well')
         mesh, info = _repair(mesh, name, by_name[name])
         applied.append(info)

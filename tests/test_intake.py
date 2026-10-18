@@ -384,3 +384,57 @@ def test_reintake_from_the_saved_source(job, tmp_path):
     assert reopened.settings.source.units == 'cm'
     assert reopened.gate_status('input') is GateStatus.STALE
     assert reopened.gate_status('plaster') is GateStatus.STALE
+
+
+# --- re-review fixes (review-notes/STAGE-3-REVIEW-HANDOFF.md, Codex re-review) -----------------
+
+def thin_sliver_and_open_stl(path):
+    """Re-review finding 2: a T-junction plus a stray sliver ~9e-9 mm tall (area ~4.5e-9 mm²).
+
+    The area test alone misses the sliver, but trimesh's height test (used by the stitcher's
+    cleanup) removes it, so stitch alone used to delete a source face silently.
+    """
+    box = trimesh.creation.box([10, 20, 30])
+    box.apply_translation(-box.vertices[0])
+    vertices, faces = box.vertices.tolist(), box.faces.tolist()
+    a, b, c = faces[0]
+    m = len(vertices)
+    vertices.append(((box.vertices[a] + box.vertices[b]) / 2).tolist())
+    faces[0] = [a, m, c]
+    faces.append([m, b, c])
+    i = len(vertices)
+    vertices.extend([[1, 0, 0], [1, 9e-9, 0]])
+    faces.append([0, i, i + 1])
+    return _write(trimesh.Trimesh(vertices, faces, process=False), path)
+
+
+def test_thin_sliver_needs_explicit_drop(job, tmp_path):
+    intake(job, thin_sliver_and_open_stl(tmp_path / 'bad.stl'), units='mm')
+    with pytest.raises(InputRejected) as error:
+        prepare(job)
+    assert {'degenerate_faces', 'open'} <= codes(error)
+    with pytest.raises(IntakeError, match='drop-degenerate'):
+        prepare(job, repairs=['stitch=0.01'])
+    assert not (job.root / 'candidates' / 'input').exists()
+    record = prepare(job, repairs=['drop-degenerate', 'stitch=0.01'])
+    assert record.details['repairs'][0] == {'repair': 'drop-degenerate', 'faces_removed': 1}
+    mesh = prepared_mesh(job, record)
+    assert mesh.is_watertight and mesh.volume == pytest.approx(6000)
+
+
+@pytest.mark.parametrize('rotations, extents', [
+    (['x=90', 'z=90', 'x=90'], [90, 60, 30]),   # (1,2,3) -> (1,3,2) -> (3,1,2) -> (3,2,1); Z = 30 -> x30
+    (['x=90', 'x=90', 'z=90'], [20, 10, 30]),   # (1,2,3) -> (1,3,2) -> (1,2,3) -> (2,1,3); Z = 30 -> x10
+])
+def test_suggested_retry_keeps_repeated_rotations(job, tmp_path, rotations, extents):
+    """Re-review finding 3: repeated rotations are meaningful and must survive the retry."""
+    box = trimesh.creation.box((1, 2, 3))
+    box.invert()
+    intake(job, _write(box, tmp_path / 'inverted.stl'), units='mm', target_mm=30, target_axis='Z')
+    with pytest.raises(InputRejected) as error:
+        prepare(job, rotations=rotations)
+    flags = _suggested_flags(error.value.next_action())
+    assert [v for k, v in zip(flags, flags[1:]) if k == '--rotate'] == [r.replace('=90', '=90.0') for r in rotations]
+    record = prepare(job, rotations=[v for k, v in zip(flags, flags[1:]) if k == '--rotate'],
+                     repairs=[v for k, v in zip(flags, flags[1:]) if k == '--repair'])
+    assert prepared_mesh(job, record).extents == pytest.approx(extents, abs=1e-4)

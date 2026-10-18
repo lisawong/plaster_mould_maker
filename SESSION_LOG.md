@@ -356,3 +356,20 @@ No implementation or test execution occurred this session. No changes committed 
   4. re-intake works from the job's own `source/` copy.
 - The teapot V7 rerun after the loader change is identical. **227 passed**, 72 subtests.
 - Open todo: review agent re-checks the fixes, or the user pushes and opens the Stage 3 PR.
+
+## 2026-10-18 — Stage 3 fixes re-review
+
+- Agent: Codex, with standards/spec review subagents.
+- Reviewed `2597c45...6dde7bb` in the context of the original main comparison. Findings 1 (non-finite loading) and 4 (saved-source re-intake) verified resolved.
+- Findings 2 and 3 remain partly open: stitch guard misses thin faces removed by the helper; retry deduplicates repeated rotations. Both reproduced end to end and documented in `review-notes/STAGE-3-REVIEW-HANDOFF.md`.
+- Full suite: 227 passed, 72 subtests passed, one existing trimesh warning. Diff whitespace check passed; inspected existing teapot-fixes previews.
+- No implementation/test changes. Open todo: fix the two remaining P2 cases test-first before Stage 3 completion.
+
+## 2026-10-18 — Stage 3 re-review fixes (branch `claude/stage-3-intake`)
+
+- Agent: Claude Code (VS Code extension), Opus 5.5. Input: Codex re-review. Findings 1 and 4 were verified; 2 and 3 were partly open.
+- Tests first: 3 regression tests (a thin sliver about 9e-9 mm tall; repeated rotations x,z,x and x,x,z). All failed for the reported reasons.
+- Fixes:
+  - **Shared degenerate test.** The new `intake.degenerate_faces` = zero area or failing trimesh's height test, the same predicate the stitcher uses. Validation, the stitch guard and drop-degenerate share it.
+  - **Retry command.** It keeps every rotation in order and deduplicates only repair flags.
+- Teapot rerun is identical (no faces newly flagged). **230 passed**, 72 subtests. The resolution is recorded in `review-notes/STAGE-3-REVIEW-HANDOFF.md`.
