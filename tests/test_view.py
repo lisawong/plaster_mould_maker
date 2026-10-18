@@ -267,7 +267,7 @@ def test_cli_views_option_and_help_explains_directions(tmp_path):
     assert 'front' in help_text and 'looks along' in help_text
 
 
-# --- review fixes (REVIEW-HANDOFF.md, 2026-10-17) ------------------------------------------
+# --- review fixes (review-notes/REVIEW-HANDOFF.md, 2026-10-17) ------------------------------------------
 
 @pytest.mark.parametrize('content', [
     [],

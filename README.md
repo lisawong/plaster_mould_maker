@@ -6,7 +6,7 @@ Build a repeatable STL → plaster mould → printable plaster-casting-form work
 
 Release 1 supports two-part plaster moulds from a single planar split, with deterministic checks, resumable jobs and hash-bound human review gates (input → plaster → forms → export). Release 2 targets more complex moulds. Printed casting forms use 3 mm walls with 20 mm outward lips, printed tongue-and-groove seams locked by external bulldog-style clips, walls 30 mm above the plaster block and a debossed fill line. The default finishing allowance is 0.1 mm per job. The finished skill will be evaluated on Sonnet 5 and Haiku 4.5.
 
-The accepted teapot demo is prototype evidence, not proof of general applicability. Its casting forms remain awaiting human review. See [PRD.md](PRD.md) for requirements and [PLAN.md](PLAN.md) for the staged build. Progress: Stages 0–2 merged (scaffold + CI; job folder, schemas and review gates; known-answer fixtures, depth-semantics audit, `release_check`); Stage 2.5 (visual inspection: `mouldflow view`, `/look`, `mould-inspector`) in progress.
+The accepted teapot demo is prototype evidence, not proof of general applicability. Its casting forms remain awaiting human review. See [PRD.md](PRD.md) for requirements and [PLAN.md](PLAN.md) for the staged build. Progress: Stages 0–3 merged (scaffold + CI; job folder, schemas and review gates; known-answer fixtures, depth-semantics audit, `release_check`; visual inspection: `mouldflow view`, `/look`, `mould-inspector`); Stage 3 merged (intake & prepare: `mouldflow intake`, `mouldflow prepare`).
 
 ## Quick start
 
@@ -18,6 +18,8 @@ uv run mouldflow --help
 uv run mouldflow job init path/to/job      # new job folder (settings, gates, artifact folders)
 uv run mouldflow job status path/to/job    # reverify hashes; gates + next_action as JSON
 uv run mouldflow job decide path/to/job input --revision REV --answer approve --note "..."
+uv run mouldflow intake path/to/job thing.stl --units mm [--target-mm 50 --target-axis Y]  # units never guessed
+uv run mouldflow prepare path/to/job [--rotate x=90]... [--repair drop-degenerate|fix-winding|stitch=TOL]...
 uv run mouldflow view a.stl=object b.stl=half_1 --out look/demo --explode y=25 --marks-from release.json
 ```
 
@@ -48,9 +50,12 @@ Pictures are inspection aids. Outcomes always come from the release checks.
   - `known_answers.py` — known-answer release fixtures for the EVALUATION-PLAN geometry rows.
   Stage 2.5 added:
   - `view.py` — `mouldflow view`: PNG contact sheet, cross-sections and self-contained three.js viewer, with release-catch marks.
+  Stage 3 added:
+  - `intake.py` — `mouldflow intake` (copy + hash source, declared units/target) and `mouldflow prepare` (validate, opt-in repairs, rotate, scale, centre; `candidates/input/rNNN/` with before/after previews; submits the input gate).
 - `.claude/skills/look/`, `.claude/agents/mould-inspector.md`, `.claude/launch.json` — visual-inspection skill, iterating inspector agent and the `look` preview server.
 - `.agents/skills/look/`, `.codex/agents/mould-inspector.toml` — the same skill and agent for Codex (used as a review agent). Edit the Claude versions and copy them across; `tests/test_view.py` fails if the copies differ.
-- `tests/` — pytest suite: 45 ported baseline tests, coupon tests, Stage 1 job/schema tests, Stage 2 known-answer release tests and Stage 2.5 view tests.
+- `review-notes/` — local only (git-ignored). The dev agent and the separate review agent hand work to each other through files here (e.g. `REVIEW-HANDOFF.md`).
+- `tests/` — pytest suite: 45 ported baseline tests, coupon tests, Stage 1 job/schema tests, Stage 2 known-answer release tests, Stage 2.5 view tests and Stage 3 intake/prepare tests.
   - `tests/fixtures/teapot-v7/` — accepted V7 source, prepared object and plaster halves for the Stage 5 regression; see its `PROVENANCE.md`.
   - `tests/fixtures/historical/` — older three-part study used only by `test_scene_artifact` (historical, not V7 evidence).
 - `tools/groove_coupon.py` — generator for the groove-clearance test print.

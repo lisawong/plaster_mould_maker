@@ -21,3 +21,6 @@ jobs/
 
 # mouldflow view output (inspection pictures; regenerate with `mouldflow view`)
 /look/
+
+# Dev ↔ review agent handoff notes (local only)
+/review-notes/

@@ -290,7 +290,7 @@ No implementation or test execution occurred this session. No changes committed 
 - Reviewed `main...HEAD` on `claude/stage-2-5-view` through `f138aa7`.
 - Reproduced three P2 findings: malformed release records escape JSON error handling; open section paths are reported as empty; palette collisions change label colours between rounds.
 - Validation: 166 tests and 72 subtests passed; one existing trimesh warning. No implementation fixes made.
-- Created [REVIEW-HANDOFF.md](REVIEW-HANDOFF.md) with reproductions, test-first fix guidance, and completion criteria.
+- Created `review-notes/REVIEW-HANDOFF.md` (local only; moved 2026-10-18) with reproductions, test-first fix guidance, and completion criteria.
 - Open todo: resolve all three handoff findings before merging Stage 2.5.
 
 ## 2026-10-17 — Stage 2.5 review fixes (local session, branch `claude/stage-2-5-view`)
@@ -310,3 +310,87 @@ No implementation or test execution occurred this session. No changes committed 
 - Result: **183 passed**, 72 subtests (one existing trimesh warning).
 - Not committed (not mine): `.agents/` and `.codex/` (Codex copies of the skill and agent).
 - Follow-up: the user will use Codex as a review agent, so I committed `.agents/skills/look/SKILL.md` and `.codex/agents/mould-inspector.toml`. The Codex agent predated the review fixes (stale loop-count and colour rules), so I regenerated it from the Claude agent. New test `test_codex_copies_match_claude_skill_and_agent` failed first, then passed. **184 passed.**
+
+## 2026-10-18 — Review-notes folder for dev ↔ review agent handoffs
+
+- Agent: Claude Code (VS Code extension), Opus 5.5.
+- Workflow change: a separate review agent now works alongside the dev agent. They communicate via files in `review-notes/`.
+- Moved `REVIEW-HANDOFF.md` → `review-notes/REVIEW-HANDOFF.md`, untracked it, and git-ignored `/review-notes/` so handoff notes stay local.
+- Updated references in PLAN.md, SCRATCHPAD.md, SESSION_LOG.md and `tests/test_view.py`; recorded the decision in SCRATCHPAD.md.
+
+## 2026-10-18 — Stage 3: intake & prepare (branch `claude/stage-3-intake`, not pushed)
+
+- Agent: Claude Code (VS Code extension), Opus 5.5.
+- Agreed the design with the user (SCRATCHPAD decision 2026-10-18): units required and target optional; `--rotate AXIS=DEG`; explicit opt-in repairs only; zero-area faces reject a source STL.
+- Tests first: `tests/test_intake.py` (33) and `tests/test_intake_cli.py` (5). They failed on the missing module. Two Stage 1 assertions changed: a fresh job's `next_action` is now `intake`. Test fixes during the work: tolerances loosened to float32 (binary STL), and the self-intersecting fixture is `KnownAnswer.fixed`, not `.moving`.
+- Built `src/mouldflow/intake.py`, the `mouldflow intake|prepare` CLI and `settings.source` fields `file`, `sha256`, `rotations`. A rejection lists every problem: the self-intersection scan runs on any closed, consistently wound mesh, even one with several pieces.
+- Looked (`look/stage3-teapot/`): teapot V7 `accepted-input.stl` → r001 matches the prototype's `prepared_object.stl` exactly (80.489 × 50 × 37.609 mm, same volume). It is one filled solid with the handle hole open. r002 (`--rotate x=90`) lies on its side, and r001 is untouched. Gotcha: the target axis is measured after rotation (r002 scaled 1.33× to keep Y = 50 mm); this is documented.
+- Result: **222 passed**, 72 subtests (one existing trimesh warning).
+- Docs: README, PLAN (Stage 2.5 marked done; Stage 3 status), TECHNICAL-REFERENCE (Intake and prepare), SCRATCHPAD.
+
+### Open todos
+
+- [ ] Review agent: review `main...claude/stage-3-intake` (handoff via `review-notes/`).
+- [ ] Push and open the Stage 3 PR once review is done (user: push after Stage 3 is complete).
+- [ ] **User:** print `prints/groove-coupon/` and report best slot + fill-line legibility (A026).
+- [ ] **User:** choose second STL (blocks Stage 10).
+- [ ] Retire prototype `workflow.ReviewWorkflow` / `review.py prepare` once commands route through `job.Job` (R10.2).
+- [ ] Stages 4–11 per PLAN.md.
+
+## 2026-10-18 — Stage 3 branch review against main
+
+- Agent: Codex, with standards and spec review subagents as required by the code-review skill.
+- Reviewed `main...HEAD` (`76754ef` → `2597c45`), using Stage 3 review notes and recorded requirements.
+- Four findings recorded in `review-notes/STAGE-3-REVIEW-HANDOFF.md`: silent non-finite face removal (P1), unrequested degenerate cleanup during stitch (P2), retry drops rotations (P2), saved-source re-intake fails (P2).
+- Full suite: 222 passed, 72 subtests passed, one existing trimesh warning. Inspected existing teapot r001 views/sections; no browser interaction or fresh teapot run.
+- No implementation/test changes. Open todo: dev agent fixes these findings test-first before Stage 3 completion.
+
+## 2026-10-18 — Stage 3 review fixes (branch `claude/stage-3-intake`)
+
+- Agent: Claude Code (VS Code extension), Opus 5.5. Input: Codex review in `review-notes/STAGE-3-REVIEW-HANDOFF.md` (one P1 and three P2 findings). The resolution is recorded in that file.
+- Tests first: 5 regression tests in `tests/test_intake.py`, all failing for the reported reasons.
+- Fixes in `src/mouldflow/intake.py`:
+  1. non-finite coordinates are rejected before load processing (at intake), with no silent triangle removal;
+  2. `stitch` is refused while zero-area faces remain;
+  3. the suggested retry command keeps the attempted `--rotate` flags;
+  4. re-intake works from the job's own `source/` copy.
+- The teapot V7 rerun after the loader change is identical. **227 passed**, 72 subtests.
+- Open todo: review agent re-checks the fixes, or the user pushes and opens the Stage 3 PR.
+
+## 2026-10-18 — Stage 3 fixes re-review
+
+- Agent: Codex, with standards/spec review subagents.
+- Reviewed `2597c45...6dde7bb` in the context of the original main comparison. Findings 1 (non-finite loading) and 4 (saved-source re-intake) verified resolved.
+- Findings 2 and 3 remain partly open: stitch guard misses thin faces removed by the helper; retry deduplicates repeated rotations. Both reproduced end to end and documented in `review-notes/STAGE-3-REVIEW-HANDOFF.md`.
+- Full suite: 227 passed, 72 subtests passed, one existing trimesh warning. Diff whitespace check passed; inspected existing teapot-fixes previews.
+- No implementation/test changes. Open todo: fix the two remaining P2 cases test-first before Stage 3 completion.
+
+## 2026-10-18 — Stage 3 re-review fixes (branch `claude/stage-3-intake`)
+
+- Agent: Claude Code (VS Code extension), Opus 5.5. Input: Codex re-review. Findings 1 and 4 were verified; 2 and 3 were partly open.
+- Tests first: 3 regression tests (a thin sliver about 9e-9 mm tall; repeated rotations x,z,x and x,x,z). All failed for the reported reasons.
+- Fixes:
+  - **Shared degenerate test.** The new `intake.degenerate_faces` = zero area or failing trimesh's height test, the same predicate the stitcher uses. Validation, the stitch guard and drop-degenerate share it.
+  - **Retry command.** It keeps every rotation in order and deduplicates only repair flags.
+- Teapot rerun is identical (no faces newly flagged). **230 passed**, 72 subtests. The resolution is recorded in `review-notes/STAGE-3-REVIEW-HANDOFF.md`.
+
+## 2026-10-18 — Stage 3 final review: good to merge
+
+- Agent: Codex, with standards/spec review subagents.
+- Reviewed `6dde7bb...5a0d133` against prior findings and accumulated main comparison. All four findings now verified resolved; no new actionable findings.
+- Full suite: 230 passed, 72 subtests passed, one existing trimesh warning. `git diff --check main...HEAD` passed.
+- Current validation of saved teapot-rereview output found no problems or degenerate faces; extents/volume exactly match the accepted prepared fixture.
+- Updated `review-notes/STAGE-3-REVIEW-HANDOFF.md`: good to merge at `5a0d133`. No implementation/test changes or merge performed.
+- Review todo complete; Stage 3 push/PR/merge workflow remains with the coding agent/user.
+
+## 2026-10-18 — Stage 3 PR
+
+- Agent: Claude Code (VS Code extension), Opus 5.5.
+- Opened PR #6 (https://github.com/lisawong/plaster_mould_maker/pull/6) from `claude/stage-3-intake`; the user asked to merge once CI is green.
+
+### Open todos
+
+- [ ] **User:** print `prints/groove-coupon/` and report best slot + fill-line legibility (A026).
+- [ ] **User:** choose second STL (blocks Stage 10).
+- [ ] Retire prototype `workflow.ReviewWorkflow` / `review.py prepare` once commands route through `job.Job` (R10.2).
+- [ ] Stage 4 (plaster mould for a given plane) next; Stages 5–11 per PLAN.md.
