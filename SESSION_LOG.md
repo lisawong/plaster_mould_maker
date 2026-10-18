@@ -373,3 +373,12 @@ No implementation or test execution occurred this session. No changes committed 
   - **Shared degenerate test.** The new `intake.degenerate_faces` = zero area or failing trimesh's height test, the same predicate the stitcher uses. Validation, the stitch guard and drop-degenerate share it.
   - **Retry command.** It keeps every rotation in order and deduplicates only repair flags.
 - Teapot rerun is identical (no faces newly flagged). **230 passed**, 72 subtests. The resolution is recorded in `review-notes/STAGE-3-REVIEW-HANDOFF.md`.
+
+## 2026-10-18 — Stage 3 final review: good to merge
+
+- Agent: Codex, with standards/spec review subagents.
+- Reviewed `6dde7bb...5a0d133` against prior findings and accumulated main comparison. All four findings now verified resolved; no new actionable findings.
+- Full suite: 230 passed, 72 subtests passed, one existing trimesh warning. `git diff --check main...HEAD` passed.
+- Current validation of saved teapot-rereview output found no problems or degenerate faces; extents/volume exactly match the accepted prepared fixture.
+- Updated `review-notes/STAGE-3-REVIEW-HANDOFF.md`: good to merge at `5a0d133`. No implementation/test changes or merge performed.
+- Review todo complete; Stage 3 push/PR/merge workflow remains with the coding agent/user.
