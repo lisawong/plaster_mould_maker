@@ -382,3 +382,15 @@ No implementation or test execution occurred this session. No changes committed 
 - Current validation of saved teapot-rereview output found no problems or degenerate faces; extents/volume exactly match the accepted prepared fixture.
 - Updated `review-notes/STAGE-3-REVIEW-HANDOFF.md`: good to merge at `5a0d133`. No implementation/test changes or merge performed.
 - Review todo complete; Stage 3 push/PR/merge workflow remains with the coding agent/user.
+
+## 2026-10-18 — Stage 3 PR
+
+- Agent: Claude Code (VS Code extension), Opus 5.5.
+- Opened PR #6 (https://github.com/lisawong/plaster_mould_maker/pull/6) from `claude/stage-3-intake`; the user asked to merge once CI is green.
+
+### Open todos
+
+- [ ] **User:** print `prints/groove-coupon/` and report best slot + fill-line legibility (A026).
+- [ ] **User:** choose second STL (blocks Stage 10).
+- [ ] Retire prototype `workflow.ReviewWorkflow` / `review.py prepare` once commands route through `job.Job` (R10.2).
+- [ ] Stage 4 (plaster mould for a given plane) next; Stages 5–11 per PLAN.md.
